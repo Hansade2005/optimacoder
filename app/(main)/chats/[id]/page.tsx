@@ -29,4 +29,4 @@ export type Message = Chat["messages"][number];
 
 // Removed edge runtime to reduce bundle size
 // export const runtime = "edge";
-export const maxDuration = 45;
+export const maxDuration = 300; // Increased to handle long AI responses

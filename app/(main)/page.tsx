@@ -412,5 +412,3 @@ function LoadingMessage({
     </div>
   );
 }
-
-export const maxDuration = 45;

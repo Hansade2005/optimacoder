@@ -61,4 +61,4 @@ export async function POST(req: Request) {
 }
 
 export const runtime = "nodejs";
-export const maxDuration = 45;
+export const maxDuration = 300; // 5 minutes for AI streaming responses

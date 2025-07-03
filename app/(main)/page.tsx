@@ -6,6 +6,7 @@ import ArrowRightIcon from "@/components/icons/arrow-right";
 import LightningBoltIcon from "@/components/icons/lightning-bolt";
 import LoadingButton from "@/components/loading-button";
 import Spinner from "@/components/spinner";
+import bgImg from "@/public/halo.png";
 import * as Select from "@radix-ui/react-select";
 import assert from "assert";
 import { CheckIcon, ChevronDownIcon } from "lucide-react";
@@ -20,7 +21,6 @@ import { useS3Upload } from "next-s3-upload";
 import UploadIcon from "@/components/icons/upload-icon";
 import { XCircleIcon } from "@heroicons/react/20/solid";
 import { MODELS, SUGGESTED_PROMPTS } from "@/lib/constants";
-import OptimaCoderLogo from "@/components/optima-coder-logo";
 
 export default function Home() {
   const { setStreamPromise } = use(Context);
@@ -55,416 +55,333 @@ export default function Home() {
     .join("\n");
 
   return (
-    <div className="relative flex grow flex-col min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden">
-        {/* Gradient orbs */}
-        <div className="absolute -top-40 -right-40 w-80 h-80 bg-gradient-to-br from-blue-400/30 to-purple-600/30 rounded-full blur-3xl animate-pulse"></div>
-        <div className="absolute -bottom-40 -left-40 w-80 h-80 bg-gradient-to-tr from-indigo-400/20 to-pink-600/20 rounded-full blur-3xl animate-pulse" style={{animationDelay: '2s'}}></div>
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-gradient-to-r from-cyan-400/10 to-blue-600/10 rounded-full blur-3xl animate-pulse" style={{animationDelay: '4s'}}></div>
-        
-        {/* Grid pattern */}
-        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:24px_24px]"></div>
+    <div className="relative flex grow flex-col min-h-screen">
+      <div className="absolute inset-0 flex justify-center">
+        <Image
+          src={bgImg}
+          alt=""
+          className="max-h-[953px] w-full max-w-[1200px] object-cover object-top mix-blend-screen"
+          priority
+        />
       </div>
 
-      <div className="relative z-10 flex h-full grow flex-col">
+      <div className="isolate flex h-full grow flex-col">
         <Header />
 
-        {/* Hero Section */}
-        <div className="flex grow flex-col items-center justify-center px-6 lg:px-8">
-          <div className="mx-auto max-w-4xl text-center">
-            {/* Badge */}
-            <div className="mb-8 inline-flex">
-              <div className="inline-flex items-center rounded-full bg-gradient-to-r from-blue-600/10 to-purple-600/10 px-6 py-2 text-sm font-medium text-gray-700 ring-1 ring-blue-600/20 backdrop-blur-sm">
-                <OptimaCoderLogo size="sm" className="mr-2" />
-                <span className="bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent font-semibold">
-                  Powered by Advanced AI Models
-                </span>
-                <div className="ml-2 flex h-2 w-2">
-                  <div className="h-2 w-2 animate-ping rounded-full bg-green-400"></div>
-                  <div className="absolute h-2 w-2 rounded-full bg-green-500"></div>
-                </div>
-              </div>
-            </div>
+        <div className="mt-10 flex grow flex-col items-center px-4 lg:mt-16">
+          <a
+            className="mb-4 inline-flex shrink-0 items-center rounded-full border-[0.5px] bg-white px-7 py-2 text-xs text-gray-800 shadow-[0px_1px_1px_0px_rgba(0,0,0,0.25)] md:text-base"
+            href="https://togetherai.link/?utm_source=llamacoder&utm_medium=referral&utm_campaign=example-app"
+            target="_blank"
+          >
+            <span className="text-center">
+              Powered by <span className="font-semibold">Together AI</span>.
+              Used by
+              <span className="font-semibold"> 1.1M+ users. </span>
+            </span>
+          </a>
 
-            {/* Main Heading */}
-            <h1 className="mb-6 text-5xl font-bold tracking-tight text-gray-900 lg:text-7xl">
-              <span className="block">Transform your</span>
-              <span className="bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 bg-clip-text text-transparent">
-                ideas into code
-              </span>
-              <span className="block">instantly</span>
-            </h1>
+          <h1 className="mt-4 text-balance text-center text-4xl leading-none text-gray-700 md:text-[64px] lg:mt-8">
+            Turn your <span className="text-blue-500">idea</span>
+            <br className="hidden md:block" /> into an{" "}
+            <span className="text-blue-500">app</span>
+          </h1>
 
-            {/* Subtitle */}
-            <p className="mx-auto mb-10 max-w-2xl text-lg leading-8 text-gray-600 lg:text-xl">
-              Experience the future of development with our AI-powered code generation platform. 
-              Create full-stack applications, scripts, and prototypes with natural language prompts.
-            </p>
+          <form
+            className="relative w-full max-w-2xl pt-6 lg:pt-12"
+            action={async (formData) => {
+              startTransition(async () => {
+                const { prompt, model, quality } = Object.fromEntries(formData);
 
-            {/* Stats */}
-            <div className="mb-12 flex items-center justify-center space-x-8 text-sm text-gray-500">
-              <div className="flex items-center space-x-2">
-                <div className="h-2 w-2 rounded-full bg-green-500"></div>
-                <span className="font-medium">1M+ Apps Generated</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="h-2 w-2 rounded-full bg-blue-500"></div>
-                <span className="font-medium">50k+ Developers</span>
-              </div>
-              <div className="flex items-center space-x-2">
-                <div className="h-2 w-2 rounded-full bg-purple-500"></div>
-                <span className="font-medium">99.9% Uptime</span>
-              </div>
-            </div>
+                assert.ok(typeof prompt === "string");
+                assert.ok(typeof model === "string");
+                assert.ok(quality === "high" || quality === "low");
 
-            {/* Main Form */}
-            <form
-              className="relative mx-auto max-w-4xl"
-              action={async (formData) => {
-                startTransition(async () => {
-                  const { prompt, model, quality } = Object.fromEntries(formData);
+                const { chatId, lastMessageId } = await createChat(
+                  prompt,
+                  model,
+                  quality,
+                  screenshotUrl,
+                );
 
-                  assert.ok(typeof prompt === "string");
-                  assert.ok(typeof model === "string");
-                  assert.ok(quality === "high" || quality === "low");
-
-                  const { chatId, lastMessageId } = await createChat(
-                    prompt,
-                    model,
-                    quality,
-                    screenshotUrl,
-                  );
-
-                  const streamPromise = fetch(
-                    "/api/get-next-completion-stream-promise",
-                    {
-                      method: "POST",
-                      body: JSON.stringify({ messageId: lastMessageId, model }),
-                    },
-                  ).then((res) => {
-                    if (!res.body) {
-                      throw new Error("No body on response");
-                    }
-                    return res.body;
-                  });
-
-                  startTransition(() => {
-                    setStreamPromise(streamPromise);
-                    router.push(`/chats/${chatId}`);
-                  });
+                const streamPromise = fetch(
+                  "/api/get-next-completion-stream-promise",
+                  {
+                    method: "POST",
+                    body: JSON.stringify({ messageId: lastMessageId, model }),
+                  },
+                ).then((res) => {
+                  if (!res.body) {
+                    throw new Error("No body on response");
+                  }
+                  return res.body;
                 });
-              }}
-            >
-              <Fieldset>
-                <div className="relative mx-auto max-w-3xl">
-                  {/* Main input card */}
-                  <div className="group relative overflow-hidden rounded-2xl bg-white/80 backdrop-blur-xl border border-gray-200/50 shadow-2xl transition-all duration-300 hover:shadow-3xl hover:border-blue-300/50">
-                    {/* Gradient border effect */}
-                    <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-600/20 via-purple-600/20 to-indigo-600/20 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
-                    
-                    <div className="w-full p-6">
-                      {/* Screenshot section */}
-                      {screenshotLoading && (
-                        <div className="mb-4">
-                          <div className="flex items-center space-x-3 p-4 bg-blue-50 rounded-xl border border-blue-200">
-                            <div className="h-12 w-16 animate-pulse items-center justify-center rounded bg-blue-200 flex">
-                              <Spinner />
-                            </div>
-                            <div>
-                              <p className="text-sm font-medium text-blue-900">Analyzing your image...</p>
-                              <p className="text-xs text-blue-600">This will help generate more accurate code</p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {screenshotUrl && (
-                        <div className={`${isPending ? "opacity-50" : ""} mb-4`}>
-                          <div className="relative inline-block">
-                            <img
-                              alt="screenshot"
-                              src={screenshotUrl}
-                              className="h-20 w-28 rounded-lg object-cover border-2 border-gray-200 shadow-md"
-                            />
-                            <button
-                              type="button"
-                              className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-white shadow-lg hover:bg-red-600 transition-colors"
-                              onClick={() => {
-                                setScreenshotUrl(undefined);
-                                if (fileInputRef.current) {
-                                  fileInputRef.current.value = "";
-                                }
-                              }}
-                            >
-                              <XCircleIcon className="h-4 w-4" />
-                            </button>
-                          </div>
-                        </div>
-                      )}
 
-                      {/* Text input */}
-                      <div className="relative mb-6">
-                        <div className="absolute inset-0 p-4 text-transparent pointer-events-none">
-                          <p className="whitespace-pre-wrap break-words">
-                            {textareaResizePrompt}
-                          </p>
-                        </div>
-                        <textarea
-                          placeholder="Describe the app you want to build... (e.g., 'Build a modern task management app with drag & drop functionality')"
-                          required
-                          name="prompt"
-                          rows={1}
-                          className="relative w-full resize-none border-0 bg-transparent p-4 text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-0 text-lg"
-                          value={prompt}
-                          onChange={(e) => setPrompt(e.target.value)}
-                          onKeyDown={(event) => {
-                            if (event.key === "Enter" && !event.shiftKey) {
-                              event.preventDefault();
-                              const target = event.target;
-                              if (!(target instanceof HTMLTextAreaElement)) return;
-                              target.closest("form")?.requestSubmit();
-                            }
-                          }}
-                        />
-                      </div>
-
-                      {/* Controls */}
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
-                          {/* Model Selection */}
-                          <Select.Root name="model" value={model} onValueChange={setModel}>
-                            <Select.Trigger className="inline-flex items-center space-x-2 rounded-lg bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
-                              <span>{selectedModel?.label}</span>
-                              <ChevronDownIcon className="h-4 w-4" />
-                            </Select.Trigger>
-                            <Select.Portal>
-                              <Select.Content className="overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-black/5 border border-gray-200">
-                                <Select.Viewport className="p-2">
-                                  {MODELS.map((m) => (
-                                    <Select.Item
-                                      key={m.value}
-                                      value={m.value}
-                                      className="flex cursor-pointer items-center rounded-lg p-3 text-sm data-[highlighted]:bg-blue-50 data-[highlighted]:outline-none transition-colors"
-                                    >
-                                      <Select.ItemText className="font-medium text-gray-900">
-                                        {m.label}
-                                      </Select.ItemText>
-                                      <Select.ItemIndicator className="ml-auto">
-                                        <CheckIcon className="h-4 w-4 text-blue-600" />
-                                      </Select.ItemIndicator>
-                                    </Select.Item>
-                                  ))}
-                                </Select.Viewport>
-                              </Select.Content>
-                            </Select.Portal>
-                          </Select.Root>
-
-                          {/* Quality Selection */}
-                          <Select.Root name="quality" value={quality} onValueChange={setQuality}>
-                            <Select.Trigger className="inline-flex items-center space-x-2 rounded-lg bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 transition-colors">
-                              <LightningBoltIcon className="h-4 w-4" />
-                              <span className="hidden sm:inline">
-                                {quality === "low" ? "Fast" : "High Quality"}
-                              </span>
-                              <ChevronDownIcon className="h-4 w-4" />
-                            </Select.Trigger>
-                            <Select.Portal>
-                              <Select.Content className="overflow-hidden rounded-xl bg-white shadow-2xl ring-1 ring-black/5 border border-gray-200">
-                                <Select.Viewport className="p-2">
-                                  {[
-                                    { value: "low", label: "Fast Generation", desc: "Quick results" },
-                                    { value: "high", label: "High Quality", desc: "Better code, takes longer" },
-                                  ].map((q) => (
-                                    <Select.Item
-                                      key={q.value}
-                                      value={q.value}
-                                      className="flex cursor-pointer flex-col rounded-lg p-3 text-sm data-[highlighted]:bg-blue-50 data-[highlighted]:outline-none transition-colors"
-                                    >
-                                      <div className="flex items-center justify-between w-full">
-                                        <Select.ItemText className="font-medium text-gray-900">
-                                          {q.label}
-                                        </Select.ItemText>
-                                        <Select.ItemIndicator>
-                                          <CheckIcon className="h-4 w-4 text-blue-600" />
-                                        </Select.ItemIndicator>
-                                      </div>
-                                      <p className="text-xs text-gray-500 mt-1">{q.desc}</p>
-                                    </Select.Item>
-                                  ))}
-                                </Select.Viewport>
-                              </Select.Content>
-                            </Select.Portal>
-                          </Select.Root>
-
-                          {/* File Upload */}
-                          <label
-                            htmlFor="screenshot"
-                            className="flex cursor-pointer items-center space-x-2 rounded-lg bg-gray-50 px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors"
-                          >
-                            <UploadIcon className="h-4 w-4" />
-                            <span className="hidden sm:inline">Upload Image</span>
-                          </label>
-                          <input
-                            id="screenshot"
-                            type="file"
-                            accept="image/png, image/jpeg, image/webp"
-                            onChange={handleScreenshotUpload}
-                            className="hidden"
-                            ref={fileInputRef}
-                          />
-                        </div>
-
-                        {/* Submit Button */}
-                        <div className="relative">
-                          <LoadingButton
-                            className="flex items-center space-x-2 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-3 font-semibold text-white shadow-lg hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 disabled:opacity-50"
-                            type="submit"
-                          >
-                            <span>Generate App</span>
-                            <ArrowRightIcon className="h-4 w-4" />
-                          </LoadingButton>
+                startTransition(() => {
+                  setStreamPromise(streamPromise);
+                  router.push(`/chats/${chatId}`);
+                });
+              });
+            }}
+          >
+            <Fieldset>
+              <div className="relative flex w-full max-w-2xl rounded-xl border-4 border-gray-300 bg-white pb-10">
+                <div className="w-full">
+                  {screenshotLoading && (
+                    <div className="relative mx-3 mt-3">
+                      <div className="rounded-xl">
+                        <div className="group mb-2 flex h-16 w-[68px] animate-pulse items-center justify-center rounded bg-gray-200">
+                          <Spinner />
                         </div>
                       </div>
-
-                      {/* Loading overlay */}
-                      {isPending && (
-                        <LoadingMessage
-                          isHighQuality={quality === "high"}
-                          screenshotUrl={screenshotUrl}
+                    </div>
+                  )}
+                  {screenshotUrl && (
+                    <div
+                      className={`${isPending ? "invisible" : ""} relative mx-3 mt-3`}
+                    >
+                      <div className="rounded-xl">
+                        <img
+                          alt="screenshot"
+                          src={screenshotUrl}
+                          className="group relative mb-2 h-16 w-[68px] rounded"
                         />
-                      )}
+                      </div>
+                      <button
+                        type="button"
+                        id="x-circle-icon"
+                        className="absolute -right-3 -top-4 left-14 z-10 size-5 rounded-full bg-white text-gray-900 hover:text-gray-500"
+                        onClick={() => {
+                          setScreenshotUrl(undefined);
+                          if (fileInputRef.current) {
+                            fileInputRef.current.value = "";
+                          }
+                        }}
+                      >
+                        <XCircleIcon />
+                      </button>
+                    </div>
+                  )}
+                  <div className="relative">
+                    <div className="p-3">
+                      <p className="invisible w-full whitespace-pre-wrap">
+                        {textareaResizePrompt}
+                      </p>
+                    </div>
+                    <textarea
+                      placeholder="Build me a budgeting app..."
+                      required
+                      name="prompt"
+                      rows={1}
+                      className="peer absolute inset-0 w-full resize-none bg-transparent p-3 placeholder-gray-500 focus-visible:outline-none disabled:opacity-50"
+                      value={prompt}
+                      onChange={(e) => setPrompt(e.target.value)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter" && !event.shiftKey) {
+                          event.preventDefault();
+                          const target = event.target;
+                          if (!(target instanceof HTMLTextAreaElement)) return;
+                          target.closest("form")?.requestSubmit();
+                        }
+                      }}
+                    />
+                  </div>
+                </div>
+                <div className="absolute bottom-2 left-2 right-2.5 flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <Select.Root
+                      name="model"
+                      value={model}
+                      onValueChange={setModel}
+                    >
+                      <Select.Trigger className="inline-flex items-center gap-1 rounded-md p-1 text-sm text-gray-400 hover:bg-gray-100 hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-300">
+                        <Select.Value aria-label={model}>
+                          <span>{selectedModel?.label}</span>
+                        </Select.Value>
+                        <Select.Icon>
+                          <ChevronDownIcon className="size-3" />
+                        </Select.Icon>
+                      </Select.Trigger>
+                      <Select.Portal>
+                        <Select.Content className="overflow-hidden rounded-md bg-white shadow ring-1 ring-black/5">
+                          <Select.Viewport className="space-y-1 p-2">
+                            {MODELS.map((m) => (
+                              <Select.Item
+                                key={m.value}
+                                value={m.value}
+                                className="flex cursor-pointer items-center gap-1 rounded-md p-1 text-sm data-[highlighted]:bg-gray-100 data-[highlighted]:outline-none"
+                              >
+                                <Select.ItemText className="inline-flex items-center gap-2 text-gray-500">
+                                  {m.label}
+                                </Select.ItemText>
+                                <Select.ItemIndicator>
+                                  <CheckIcon className="size-3 text-blue-600" />
+                                </Select.ItemIndicator>
+                              </Select.Item>
+                            ))}
+                          </Select.Viewport>
+                          <Select.ScrollDownButton />
+                          <Select.Arrow />
+                        </Select.Content>
+                      </Select.Portal>
+                    </Select.Root>
+
+                    <div className="h-4 w-px bg-gray-200 max-sm:hidden" />
+
+                    <Select.Root
+                      name="quality"
+                      value={quality}
+                      onValueChange={setQuality}
+                    >
+                      <Select.Trigger className="inline-flex items-center gap-1 rounded p-1 text-sm text-gray-400 hover:bg-gray-100 hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-300">
+                        <Select.Value aria-label={quality}>
+                          <span className="max-sm:hidden">
+                            {quality === "low"
+                              ? "Low quality [faster]"
+                              : "High quality [slower]"}
+                          </span>
+                          <span className="sm:hidden">
+                            <LightningBoltIcon className="size-3" />
+                          </span>
+                        </Select.Value>
+                        <Select.Icon>
+                          <ChevronDownIcon className="size-3" />
+                        </Select.Icon>
+                      </Select.Trigger>
+                      <Select.Portal>
+                        <Select.Content className="overflow-hidden rounded-md bg-white shadow ring-1 ring-black/5">
+                          <Select.Viewport className="space-y-1 p-2">
+                            {[
+                              { value: "low", label: "Low quality [faster]" },
+                              {
+                                value: "high",
+                                label: "High quality [slower]",
+                              },
+                            ].map((q) => (
+                              <Select.Item
+                                key={q.value}
+                                value={q.value}
+                                className="flex cursor-pointer items-center gap-1 rounded-md p-1 text-sm data-[highlighted]:bg-gray-100 data-[highlighted]:outline-none"
+                              >
+                                <Select.ItemText className="inline-flex items-center gap-2 text-gray-500">
+                                  {q.label}
+                                </Select.ItemText>
+                                <Select.ItemIndicator>
+                                  <CheckIcon className="size-3 text-blue-600" />
+                                </Select.ItemIndicator>
+                              </Select.Item>
+                            ))}
+                          </Select.Viewport>
+                          <Select.ScrollDownButton />
+                          <Select.Arrow />
+                        </Select.Content>
+                      </Select.Portal>
+                    </Select.Root>
+                    <div className="h-4 w-px bg-gray-200 max-sm:hidden" />
+                    <div>
+                      <label
+                        htmlFor="screenshot"
+                        className="flex cursor-pointer gap-2 text-sm text-gray-400 hover:underline"
+                      >
+                        <div className="flex size-6 items-center justify-center rounded bg-black hover:bg-gray-700">
+                          <UploadIcon className="size-4" />
+                        </div>
+                        <div className="flex items-center justify-center transition hover:text-gray-700">
+                          Attach
+                        </div>
+                      </label>
+                      <input
+                        // name="screenshot"
+                        id="screenshot"
+                        type="file"
+                        accept="image/png, image/jpeg, image/webp"
+                        onChange={handleScreenshotUpload}
+                        className="hidden"
+                        ref={fileInputRef}
+                      />
                     </div>
                   </div>
-                </div>
 
-                {/* Example prompts */}
-                <div className="mx-auto mt-8 max-w-4xl">
-                  <p className="mb-4 text-center text-sm font-medium text-gray-600">
-                    Try these examples:
-                  </p>
-                  <div className="flex flex-wrap justify-center gap-3">
-                    {SUGGESTED_PROMPTS.map((v) => (
-                      <button
-                        key={v.title}
-                        type="button"
-                        onClick={() => setPrompt(v.description)}
-                        className="rounded-lg bg-white/80 backdrop-blur-sm px-4 py-2 text-sm font-medium text-gray-700 shadow-md hover:bg-white hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-200 border border-gray-200/50 hover:border-blue-300/50"
-                      >
-                        {v.title}
-                      </button>
-                    ))}
+                  <div className="relative flex shrink-0 has-[:disabled]:opacity-50">
+                    <div className="pointer-events-none absolute inset-0 -bottom-[1px] rounded bg-blue-500" />
+
+                    <LoadingButton
+                      className="relative inline-flex size-6 items-center justify-center rounded bg-blue-500 font-medium text-white shadow-lg outline-blue-300 hover:bg-blue-500/75 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+                      type="submit"
+                    >
+                      <ArrowRightIcon />
+                    </LoadingButton>
                   </div>
                 </div>
-              </Fieldset>
-            </form>
-          </div>
-        </div>
 
-        {/* Features Section */}
-        <div className="relative py-20">
-          <div className="mx-auto max-w-7xl px-6 lg:px-8">
-            <div className="mx-auto max-w-2xl text-center">
-              <h2 className="text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">
-                Why choose Optima Coder?
-              </h2>
-              <p className="mt-4 text-lg leading-8 text-gray-600">
-                Advanced AI capabilities that understand your vision and deliver production-ready code.
-              </p>
-            </div>
-            
-            <div className="mx-auto mt-16 max-w-5xl">
-              <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-                {[
-                  {
-                    icon: "⚡",
-                    title: "Lightning Fast",
-                    description: "Generate complete applications in seconds with our optimized AI models."
-                  },
-                  {
-                    icon: "🎨",
-                    title: "Beautiful Design",
-                    description: "Every generated app comes with modern, responsive UI components."
-                  },
-                  {
-                    icon: "🔧",
-                    title: "Production Ready",
-                    description: "Clean, maintainable code that follows best practices and industry standards."
-                  },
-                  {
-                    icon: "🌐",
-                    title: "Full Stack",
-                    description: "Generate frontend, backend, and database schemas in one go."
-                  },
-                  {
-                    icon: "📱",
-                    title: "Multi-Platform",
-                    description: "Create web apps, mobile interfaces, and desktop applications."
-                  },
-                  {
-                    icon: "🚀",
-                    title: "Deploy Anywhere",
-                    description: "Export code that works with Vercel, Netlify, AWS, and more."
-                  }
-                ].map((feature, index) => (
-                  <div
-                    key={index}
-                    className="group relative overflow-hidden rounded-2xl bg-white/50 backdrop-blur-sm p-6 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-200/50 hover:border-blue-300/50"
+                {isPending && (
+                  <LoadingMessage
+                    isHighQuality={quality === "high"}
+                    screenshotUrl={screenshotUrl}
+                  />
+                )}
+              </div>
+              <div className="mt-4 flex w-full flex-wrap justify-center gap-3">
+                {SUGGESTED_PROMPTS.map((v) => (
+                  <button
+                    key={v.title}
+                    type="button"
+                    onClick={() => setPrompt(v.description)}
+                    className="rounded bg-gray-200 px-2.5 py-1.5 text-xs hover:bg-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-300"
                   >
-                    <div className="text-4xl mb-4">{feature.icon}</div>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                      {feature.title}
-                    </h3>
-                    <p className="text-gray-600 text-sm leading-relaxed">
-                      {feature.description}
-                    </p>
-                    
-                    {/* Hover effect */}
-                    <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 to-purple-600/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10"></div>
-                  </div>
+                    {v.title}
+                  </button>
                 ))}
               </div>
-            </div>
-          </div>
+            </Fieldset>
+          </form>
         </div>
 
-        {/* Footer */}
-        <footer className="relative border-t border-gray-200/50 bg-white/80 backdrop-blur-sm">
-          <div className="mx-auto max-w-7xl px-6 py-12 lg:px-8">
-            <div className="flex flex-col items-center justify-between space-y-4 sm:flex-row sm:space-y-0">
-              <div className="flex items-center space-x-3">
-                <OptimaCoderLogo size="sm" />
-                <div>
-                  <p className="text-sm font-semibold text-gray-900">Optima Coder</p>
-                  <p className="text-xs text-gray-500">AI-Powered Development Platform</p>
-                </div>
-              </div>
-              
-              <div className="flex items-center space-x-6">
-                <Link href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
-                  Privacy
-                </Link>
-                <Link href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
-                  Terms
-                </Link>
-                <Link href="#" className="text-sm text-gray-600 hover:text-gray-900 transition-colors">
-                  Support
-                </Link>
-                <a
-                  href="https://github.com/your-repo/optimacoder"
-                  target="_blank"
-                  className="text-sm text-gray-600 hover:text-gray-900 transition-colors"
-                >
-                  GitHub
-                </a>
-              </div>
+        <footer className="flex w-full flex-col items-center justify-between space-y-3 px-5 pb-3 pt-5 text-center sm:flex-row sm:pt-2">
+          <div>
+            <div className="font-medium">
+              Built with{" "}
+              <a
+                href="https://togetherai.link/?utm_source=llamacoder&utm_medium=referral&utm_campaign=example-app"
+                className="font-semibold text-blue-600 underline-offset-4 transition hover:text-gray-700 hover:underline"
+              >
+                Llama
+              </a>{" "}
+              and{" "}
+              <a
+                href="https://togetherai.link/?utm_source=llamacoder&utm_medium=referral&utm_campaign=example-app"
+                className="font-semibold text-blue-600 underline-offset-4 transition hover:text-gray-700 hover:underline"
+              >
+                Together AI
+              </a>
+              .
             </div>
-            
-            <div className="mt-8 border-t border-gray-200/50 pt-8 text-center">
-              <p className="text-xs text-gray-500">
-                © 2025 Optima Coder. Built with cutting-edge AI technology.
-              </p>
-            </div>
+          </div>
+          <div className="flex space-x-4 pb-4 sm:pb-0">
+            <Link
+              href="https://twitter.com/nutlope"
+              className="group"
+              aria-label=""
+            >
+              <svg
+                aria-hidden="true"
+                className="h-6 w-6 fill-gray-500 group-hover:fill-gray-700"
+              >
+                <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0 0 22 5.92a8.19 8.19 0 0 1-2.357.646 4.118 4.118 0 0 0 1.804-2.27 8.224 8.224 0 0 1-2.605.996 4.107 4.107 0 0 0-6.993 3.743 11.65 11.65 0 0 1-8.457-4.287 4.106 4.106 0 0 0 1.27 5.477A4.073 4.073 0 0 1 2.8 9.713v.052a4.105 4.105 0 0 0 3.292 4.022 4.093 4.093 0 0 1-1.853.07 4.108 4.108 0 0 0 3.834 2.85A8.233 8.233 0 0 1 2 18.407a11.615 11.615 0 0 0 6.29 1.84" />
+              </svg>
+            </Link>
+            <Link
+              href="https://github.com/Nutlope/llamacoder"
+              className="group"
+              aria-label=""
+            >
+              <svg
+                aria-hidden="true"
+                className="h-6 w-6 fill-slate-500 group-hover:fill-slate-700"
+              >
+                <path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2Z" />
+              </svg>
+            </Link>
           </div>
         </footer>
       </div>
@@ -480,38 +397,17 @@ function LoadingMessage({
   screenshotUrl: string | undefined;
 }) {
   return (
-    <div className="absolute inset-0 flex items-center justify-center rounded-2xl bg-white/95 backdrop-blur-sm">
-      <div className="flex flex-col items-center justify-center space-y-4 text-center">
-        <div className="relative">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600"></div>
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="h-6 w-6 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 animate-pulse"></div>
-          </div>
-        </div>
-        
-        <div className="space-y-2">
-          <p className="text-lg font-semibold text-gray-900">
-            {isHighQuality
-              ? "Crafting your perfect app..."
-              : screenshotUrl
-                ? "Analyzing your design..."
-                : "Generating your application..."}
-          </p>
-          <p className="text-sm text-gray-600 max-w-md">
-            {isHighQuality
-              ? "Creating a comprehensive solution with detailed planning. This may take up to 30 seconds."
-              : screenshotUrl
-                ? "Processing your image to understand the design requirements."
-                : "Building your application with modern best practices."}
-          </p>
-        </div>
-        
-        {/* Progress indicators */}
-        <div className="flex space-x-1">
-          <div className="h-2 w-2 rounded-full bg-blue-600 animate-bounce"></div>
-          <div className="h-2 w-2 rounded-full bg-purple-600 animate-bounce" style={{animationDelay: '0.1s'}}></div>
-          <div className="h-2 w-2 rounded-full bg-indigo-600 animate-bounce" style={{animationDelay: '0.2s'}}></div>
-        </div>
+    <div className="absolute inset-0 flex items-center justify-center rounded-xl bg-white px-1 py-3 md:px-3">
+      <div className="flex flex-col items-center justify-center gap-2 text-gray-500">
+        <span className="animate-pulse text-balance text-center text-sm md:text-base">
+          {isHighQuality
+            ? `Coming up with project plan, may take 15 seconds...`
+            : screenshotUrl
+              ? "Analyzing your screenshot..."
+              : `Creating your app...`}
+        </span>
+
+        <Spinner />
       </div>
     </div>
   );

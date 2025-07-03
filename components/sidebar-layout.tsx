@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import ChatSidebar from "@/components/chat-sidebar";
+import { SidebarProvider, useSidebar } from "@/components/sidebar-context";
 import { deleteChat, updateChatTitle, getChats } from "@/app/(main)/actions";
 
 interface Chat {
@@ -16,9 +17,10 @@ interface SidebarLayoutProps {
   children: React.ReactNode;
 }
 
-export default function SidebarLayout({ children }: SidebarLayoutProps) {
+function SidebarLayoutInner({ children }: SidebarLayoutProps) {
   const [chats, setChats] = useState<Chat[]>([]);
   const [loading, setLoading] = useState(true);
+  const { isCollapsed } = useSidebar();
   const router = useRouter();
   const pathname = usePathname();
 
@@ -93,12 +95,23 @@ export default function SidebarLayout({ children }: SidebarLayoutProps) {
         onUpdateTitle={handleUpdateTitle}
       />
       
-      {/* Main content area with sidebar spacing */}
-      <div className="flex-1 transition-all duration-300 ml-12">
+      {/* Main content area with dynamic sidebar spacing */}
+      <div className={`
+        flex-1 transition-all duration-300
+        ${isCollapsed ? 'ml-0' : 'ml-80'}
+      `}>
         <div className="h-full">
           {children}
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SidebarLayout({ children }: SidebarLayoutProps) {
+  return (
+    <SidebarProvider>
+      <SidebarLayoutInner>{children}</SidebarLayoutInner>
+    </SidebarProvider>
   );
 }

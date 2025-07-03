@@ -3,8 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import ChevronLeftIcon from "@/components/icons/chevron-left";
-import ChevronRightIcon from "@/components/icons/chevron-right";
+import { useSidebar } from "@/components/sidebar-context";
 import { 
   MagnifyingGlassIcon,
   PlusIcon,
@@ -13,6 +12,7 @@ import {
   CheckIcon,
   XMarkIcon
 } from "@heroicons/react/24/outline";
+import { PanelLeft } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 interface Chat {
@@ -35,7 +35,7 @@ export default function ChatSidebar({
   onDeleteChat, 
   onUpdateTitle 
 }: ChatSidebarProps) {
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const { isCollapsed, setIsCollapsed } = useSidebar();
   const [searchQuery, setSearchQuery] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
@@ -97,11 +97,23 @@ export default function ChatSidebar({
         />
       )}
       
+      {/* Floating hamburger button when sidebar is collapsed */}
+      {isCollapsed && (
+        <button
+          onClick={() => setIsCollapsed(false)}
+          className="fixed top-4 left-4 z-50 p-3 bg-gray-900 text-white rounded-lg shadow-lg hover:bg-gray-800 transition-colors"
+          title="Open sidebar"
+        >
+          <PanelLeft className="size-5" />
+        </button>
+      )}
+      
       {/* Sidebar */}
       <div className={`
         fixed left-0 top-0 h-full bg-gray-900 text-white transition-all duration-300 z-50
-        ${sidebarWidth}
+        ${isCollapsed ? "w-0" : "w-80"}
         ${isMobile ? 'shadow-xl' : 'border-r border-gray-700'}
+        overflow-hidden
       `}>
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-gray-700">
@@ -111,13 +123,10 @@ export default function ChatSidebar({
           
           <button
             onClick={() => setIsCollapsed(!isCollapsed)}
-            className="p-1 rounded-md hover:bg-gray-700 transition-colors"
+            className="p-2 rounded-md hover:bg-gray-700 transition-colors"
+            title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
           >
-            {isCollapsed ? (
-              <ChevronRightIcon className="size-5" />
-            ) : (
-              <ChevronLeftIcon className="size-5" />
-            )}
+            <PanelLeft className="size-5" />
           </button>
         </div>
 

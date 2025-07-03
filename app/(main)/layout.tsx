@@ -1,5 +1,6 @@
 import Providers from "@/app/(main)/providers";
 import { Toaster } from "@/components/ui/toaster";
+import SidebarLayout from "@/components/sidebar-layout";
 
 export default function Layout({
   children,
@@ -9,7 +10,9 @@ export default function Layout({
   return (
     <Providers>
       <body className="flex min-h-full flex-col bg-gray-100 text-gray-900 antialiased">
-        {children}
+        <SidebarLayout>
+          {children}
+        </SidebarLayout>
 
         <Toaster />
       </body>

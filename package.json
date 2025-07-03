@@ -28,6 +28,7 @@
     "@tailwindcss/typography": "^0.5.15",
     "@vercel/og": "^0.6.4",
     "class-variance-authority": "^0.7.1",
+    "date-fns": "^4.1.0",
     "dedent": "^1.5.3",
     "framer-motion": "^11.18.0",
     "lucide-react": "^0.468.0",

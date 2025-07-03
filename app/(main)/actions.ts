@@ -204,3 +204,44 @@ export async function createMessage(
 
   return newMessage;
 }
+
+// Chat management actions
+export async function getChats() {
+  const prisma = getPrisma();
+  const chats = await prisma.chat.findMany({
+    orderBy: {
+      createdAt: "desc",
+    },
+    select: {
+      id: true,
+      title: true,
+      createdAt: true,
+      model: true,
+    },
+  });
+
+  return chats;
+}
+
+export async function deleteChat(chatId: string) {
+  const prisma = getPrisma();
+  await prisma.chat.delete({
+    where: {
+      id: chatId,
+    },
+  });
+}
+
+export async function updateChatTitle(chatId: string, newTitle: string) {
+  const prisma = getPrisma();
+  const updatedChat = await prisma.chat.update({
+    where: {
+      id: chatId,
+    },
+    data: {
+      title: newTitle,
+    },
+  });
+
+  return updatedChat;
+}

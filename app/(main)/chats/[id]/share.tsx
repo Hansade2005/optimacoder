@@ -2,7 +2,7 @@
 
 import ShareIcon from "@/components/icons/share-icon";
 import { toast } from "@/hooks/use-toast";
-import { Message } from "@prisma/client";
+import { Message } from "./page";
 
 export function Share({ message }: { message?: Message }) {
   async function shareAction() {

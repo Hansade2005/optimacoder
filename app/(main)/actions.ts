@@ -169,7 +169,7 @@ export async function createChat(
   });
 
   const lastMessage = newChat.messages
-    .sort((a, b) => a.position - b.position)
+    .sort((a: any, b: any) => a.position - b.position)
     .at(-1);
   if (!lastMessage) throw new Error("No new message");
 
@@ -191,7 +191,7 @@ export async function createMessage(
   });
   if (!chat) notFound();
 
-  const maxPosition = Math.max(...chat.messages.map((m) => m.position));
+  const maxPosition = Math.max(...chat.messages.map((m: any) => m.position));
 
   const newMessage = await prisma.message.create({
     data: {

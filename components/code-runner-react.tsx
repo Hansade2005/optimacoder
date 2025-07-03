@@ -1,6 +1,5 @@
 "use client";
 
-import * as shadcnComponents from "@/lib/shadcn";
 import {
   SandpackPreview,
   SandpackProvider,
@@ -8,7 +7,7 @@ import {
 } from "@codesandbox/sandpack-react/unstyled";
 import dedent from "dedent";
 import { CheckIcon, CopyIcon } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function ReactCodeRunner({
   code,
@@ -17,6 +16,17 @@ export default function ReactCodeRunner({
   code: string;
   onRequestFix?: (e: string) => void;
 }) {
+  const [shadcnComponents, setShadcnComponents] = useState<any>(null);
+
+  useEffect(() => {
+    // Dynamically import shadcn components to avoid bundling with Edge Function
+    import("@/lib/shadcn").then(setShadcnComponents);
+  }, []);
+
+  if (!shadcnComponents) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <SandpackProvider
       key={code}
@@ -24,7 +34,7 @@ export default function ReactCodeRunner({
       className="relative h-full w-full [&_.sp-preview-container]:flex [&_.sp-preview-container]:h-full [&_.sp-preview-container]:w-full [&_.sp-preview-container]:grow [&_.sp-preview-container]:flex-col [&_.sp-preview-container]:justify-center [&_.sp-preview-iframe]:grow"
       files={{
         "App.tsx": code,
-        ...shadcnFiles,
+        ...getShadcnFiles(shadcnComponents),
         "/tsconfig.json": {
           code: `{
             "include": [
@@ -112,70 +122,72 @@ function ErrorMessage({ onRequestFix }: { onRequestFix: (e: string) => void }) {
   );
 }
 
-const shadcnFiles = {
-  "/lib/utils.ts": shadcnComponents.utils,
-  "/components/ui/accordion.tsx": shadcnComponents.accordian,
-  "/components/ui/alert-dialog.tsx": shadcnComponents.alertDialog,
-  "/components/ui/alert.tsx": shadcnComponents.alert,
-  "/components/ui/avatar.tsx": shadcnComponents.avatar,
-  "/components/ui/badge.tsx": shadcnComponents.badge,
-  "/components/ui/breadcrumb.tsx": shadcnComponents.breadcrumb,
-  "/components/ui/button.tsx": shadcnComponents.button,
-  "/components/ui/calendar.tsx": shadcnComponents.calendar,
-  "/components/ui/card.tsx": shadcnComponents.card,
-  "/components/ui/carousel.tsx": shadcnComponents.carousel,
-  "/components/ui/checkbox.tsx": shadcnComponents.checkbox,
-  "/components/ui/collapsible.tsx": shadcnComponents.collapsible,
-  "/components/ui/dialog.tsx": shadcnComponents.dialog,
-  "/components/ui/drawer.tsx": shadcnComponents.drawer,
-  "/components/ui/dropdown-menu.tsx": shadcnComponents.dropdownMenu,
-  "/components/ui/input.tsx": shadcnComponents.input,
-  "/components/ui/label.tsx": shadcnComponents.label,
-  "/components/ui/menubar.tsx": shadcnComponents.menuBar,
-  "/components/ui/navigation-menu.tsx": shadcnComponents.navigationMenu,
-  "/components/ui/pagination.tsx": shadcnComponents.pagination,
-  "/components/ui/popover.tsx": shadcnComponents.popover,
-  "/components/ui/progress.tsx": shadcnComponents.progress,
-  "/components/ui/radio-group.tsx": shadcnComponents.radioGroup,
-  "/components/ui/select.tsx": shadcnComponents.select,
-  "/components/ui/separator.tsx": shadcnComponents.separator,
-  "/components/ui/skeleton.tsx": shadcnComponents.skeleton,
-  "/components/ui/slider.tsx": shadcnComponents.slider,
-  "/components/ui/switch.tsx": shadcnComponents.switchComponent,
-  "/components/ui/table.tsx": shadcnComponents.table,
-  "/components/ui/tabs.tsx": shadcnComponents.tabs,
-  "/components/ui/textarea.tsx": shadcnComponents.textarea,
-  "/components/ui/toast.tsx": shadcnComponents.toast,
-  "/components/ui/toaster.tsx": shadcnComponents.toaster,
-  "/components/ui/toggle-group.tsx": shadcnComponents.toggleGroup,
-  "/components/ui/toggle.tsx": shadcnComponents.toggle,
-  "/components/ui/tooltip.tsx": shadcnComponents.tooltip,
-  "/components/ui/use-toast.tsx": shadcnComponents.useToast,
-  "/components/ui/index.tsx": `
-  export * from "./button"
-  export * from "./card"
-  export * from "./input"
-  export * from "./label"
-  export * from "./select"
-  export * from "./textarea"
-  export * from "./avatar"
-  export * from "./radio-group"
-  `,
-  "/public/index.html": dedent`
-    <!DOCTYPE html>
-    <html lang="en">
-      <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Document</title>
-        <script src="https://cdn.tailwindcss.com"></script>
-      </head>
-      <body>
-        <div id="root"></div>
-      </body>
-    </html>
-  `,
-};
+function getShadcnFiles(shadcnComponents: any) {
+  return {
+    "/lib/utils.ts": shadcnComponents.utils,
+    "/components/ui/accordion.tsx": shadcnComponents.accordian,
+    "/components/ui/alert-dialog.tsx": shadcnComponents.alertDialog,
+    "/components/ui/alert.tsx": shadcnComponents.alert,
+    "/components/ui/avatar.tsx": shadcnComponents.avatar,
+    "/components/ui/badge.tsx": shadcnComponents.badge,
+    "/components/ui/breadcrumb.tsx": shadcnComponents.breadcrumb,
+    "/components/ui/button.tsx": shadcnComponents.button,
+    "/components/ui/calendar.tsx": shadcnComponents.calendar,
+    "/components/ui/card.tsx": shadcnComponents.card,
+    "/components/ui/carousel.tsx": shadcnComponents.carousel,
+    "/components/ui/checkbox.tsx": shadcnComponents.checkbox,
+    "/components/ui/collapsible.tsx": shadcnComponents.collapsible,
+    "/components/ui/dialog.tsx": shadcnComponents.dialog,
+    "/components/ui/drawer.tsx": shadcnComponents.drawer,
+    "/components/ui/dropdown-menu.tsx": shadcnComponents.dropdownMenu,
+    "/components/ui/input.tsx": shadcnComponents.input,
+    "/components/ui/label.tsx": shadcnComponents.label,
+    "/components/ui/menubar.tsx": shadcnComponents.menuBar,
+    "/components/ui/navigation-menu.tsx": shadcnComponents.navigationMenu,
+    "/components/ui/pagination.tsx": shadcnComponents.pagination,
+    "/components/ui/popover.tsx": shadcnComponents.popover,
+    "/components/ui/progress.tsx": shadcnComponents.progress,
+    "/components/ui/radio-group.tsx": shadcnComponents.radioGroup,
+    "/components/ui/select.tsx": shadcnComponents.select,
+    "/components/ui/separator.tsx": shadcnComponents.separator,
+    "/components/ui/skeleton.tsx": shadcnComponents.skeleton,
+    "/components/ui/slider.tsx": shadcnComponents.slider,
+    "/components/ui/switch.tsx": shadcnComponents.switchComponent,
+    "/components/ui/table.tsx": shadcnComponents.table,
+    "/components/ui/tabs.tsx": shadcnComponents.tabs,
+    "/components/ui/textarea.tsx": shadcnComponents.textarea,
+    "/components/ui/toast.tsx": shadcnComponents.toast,
+    "/components/ui/toaster.tsx": shadcnComponents.toaster,
+    "/components/ui/toggle-group.tsx": shadcnComponents.toggleGroup,
+    "/components/ui/toggle.tsx": shadcnComponents.toggle,
+    "/components/ui/tooltip.tsx": shadcnComponents.tooltip,
+    "/components/ui/use-toast.tsx": shadcnComponents.useToast,
+    "/components/ui/index.tsx": `
+    export * from "./button"
+    export * from "./card"
+    export * from "./input"
+    export * from "./label"
+    export * from "./select"
+    export * from "./textarea"
+    export * from "./avatar"
+    export * from "./radio-group"
+    `,
+    "/public/index.html": dedent`
+      <!DOCTYPE html>
+      <html lang="en">
+        <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Document</title>
+          <script src="https://cdn.tailwindcss.com"></script>
+        </head>
+        <body>
+          <div id="root"></div>
+        </body>
+      </html>
+    `,
+  };
+}
 
 const dependencies = {
   "lucide-react": "latest",

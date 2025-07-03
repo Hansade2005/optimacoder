@@ -20,7 +20,8 @@ export default function ReactCodeRunner({
 
   useEffect(() => {
     // Dynamically import shadcn components to avoid bundling with Edge Function
-    import("@/lib/shadcn").then(setShadcnComponents);
+    // This ensures the components are only loaded when the CodeRunner is actually used
+    import("@/lib/shadcn").then(setShadcnComponents).catch(console.error);
   }, []);
 
   if (!shadcnComponents) {

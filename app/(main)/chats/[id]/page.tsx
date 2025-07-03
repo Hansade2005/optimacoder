@@ -27,5 +27,6 @@ const getChatById = cache(async (id: string) => {
 export type Chat = NonNullable<Awaited<ReturnType<typeof getChatById>>>;
 export type Message = Chat["messages"][number];
 
-export const runtime = "edge";
+// Removed edge runtime to reduce bundle size
+// export const runtime = "edge";
 export const maxDuration = 45;

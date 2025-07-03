@@ -13,11 +13,13 @@ import dynamic from "next/dynamic";
 
 const CodeRunner = dynamic(() => import("@/components/code-runner"), {
   ssr: false,
+  loading: () => <div className="flex items-center justify-center p-4">Loading code runner...</div>
 });
 const SyntaxHighlighter = dynamic(
   () => import("@/components/syntax-highlighter"),
   {
     ssr: false,
+    loading: () => <div className="flex items-center justify-center p-4">Loading syntax highlighter...</div>
   },
 );
 

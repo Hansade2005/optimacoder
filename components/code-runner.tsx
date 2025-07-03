@@ -3,7 +3,7 @@
 //   runPythonCode,
 // } from "@/components/code-runner-actions";
 // import CodeRunnerServerAction from "@/components/code-runner-server-action";
-import CodeRunnerReact from "./code-runner-react";
+import LazyCodeRunner from "./code-runner-lazy";
 
 export default function CodeRunner({
   language,
@@ -14,7 +14,7 @@ export default function CodeRunner({
   code: string;
   onRequestFix?: (e: string) => void;
 }) {
-  return <CodeRunnerReact code={code} onRequestFix={onRequestFix} />;
+  return <LazyCodeRunner language={language} code={code} onRequestFix={onRequestFix} />;
 
   // return (
   //   <>

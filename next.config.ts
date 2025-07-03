@@ -10,6 +10,14 @@ const nextConfig: NextConfig = {
       if (!config.resolve.conditionNames.includes("worker")) {
         config.resolve.conditionNames.push("worker");
       }
+      
+      // Exclude heavy packages from edge bundles
+      config.externals = config.externals || [];
+      config.externals.push({
+        "@codesandbox/sandpack-react": "{}",
+        "@codesandbox/sandpack-themes": "{}",
+        "shiki": "{}"
+      });
     }
     return config;
   },

@@ -104,7 +104,7 @@ export default function ChatSidebar({
           className="fixed top-4 left-4 z-50 p-3 bg-gray-900 text-white rounded-lg shadow-lg hover:bg-gray-800 transition-colors"
           title="Open sidebar"
         >
-          <PanelLeft className="size-5" />
+          <PanelLeft className="size-5 bg-transparent" />
         </button>
       )}
       

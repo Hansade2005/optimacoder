@@ -2,6 +2,7 @@ export default function HamburgerIcon({ className }: { className?: string }) {
   return (
     <svg
       className={className}
+      style={{ backgroundColor: 'transparent' }}
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"

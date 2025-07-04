@@ -78,13 +78,13 @@ function PreviewWithConsole({
   onRequestFix: (e: string) => void; 
   refresh: number; 
 }) {
-  const [isConsoleCollapsed, setIsConsoleCollapsed] = useState(false);
-  
+  const [isConsoleCollapsed, setIsConsoleCollapsed] = useState(true);
+
   // Use the same logic as ReactCodeRunner but add console
   const fullContent = code;
   const parsedProject = parseCodeBlocksToProject(fullContent);
   const isMultiFile = parsedProject.files.length > 1;
-  
+
   let finalProject = isMultiFile ? parsedProject : {
     template: 'react-ts' as const,
     files: [{ path: '/App.tsx', content: code }],
@@ -120,26 +120,29 @@ function PreviewWithConsole({
             className="h-full w-full"
           />
         </div>
-        <div className={`border-t border-gray-300 bg-white transition-all duration-300 ${isConsoleCollapsed ? 'h-12' : 'h-48'}`}>
+        <div
+          className={`border-t border-gray-300 bg-white transition-all duration-300 ${isConsoleCollapsed ? 'max-h-10' : 'max-h-56'} overflow-hidden`}
+        >
           <button
             onClick={() => setIsConsoleCollapsed(!isConsoleCollapsed)}
             className="w-full px-4 py-2 bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors duration-200 flex items-center justify-between"
+            aria-expanded={!isConsoleCollapsed}
           >
             <span>Console</span>
-            <svg 
+            <svg
               className={`size-4 transition-transform duration-200 ${isConsoleCollapsed ? 'rotate-180' : ''}`}
-              fill="none" 
-              stroke="currentColor" 
+              fill="none"
+              stroke="currentColor"
               viewBox="0 0 24 24"
             >
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
             </svg>
           </button>
-          {!isConsoleCollapsed && (
-            <div className="h-40 overflow-y-auto bg-white">
-              <SandpackConsole className="h-full w-full" />
-            </div>
-          )}
+          <div className={`transition-all duration-300 ${isConsoleCollapsed ? 'opacity-0 pointer-events-none' : 'opacity-100'}`}
+            style={{ maxHeight: isConsoleCollapsed ? 0 : 160 }}
+          >
+            <SandpackConsole className="h-40 w-full" />
+          </div>
         </div>
       </div>
     </SandpackProvider>
@@ -206,6 +209,7 @@ export default function CodeViewer({
   const [refresh, setRefresh] = useState(0);
   const [showExportModal, setShowExportModal] = useState(false);
 
+  // Only render streaming/code output in the "Code" tab, and preview in the "Preview" tab
   return (
     <>
       <div className="flex h-16 shrink-0 items-center justify-between border-b border-gray-300 px-4">
@@ -261,6 +265,7 @@ export default function CodeViewer({
             )
           ) : (
             <>
+              {/* Only render preview for correct project structure (multi/single) */}
               {language && (
                 <PreviewWithConsole
                   language={language}

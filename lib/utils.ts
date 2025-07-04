@@ -172,3 +172,479 @@ export function splitByFirstCodeFence(markdown: string) {
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
+
+// Framework export utilities
+export type FrameworkType = 'nextjs' | 'react-vite' | 'react-cra';
+
+export interface ExportConfig {
+  framework: FrameworkType;
+  projectName: string;
+  componentCode: string;
+  language: string;
+  dependencies?: string[];
+}
+
+export function generateFrameworkStructure(config: ExportConfig) {
+  const { framework, projectName, componentCode, language } = config;
+
+  switch (framework) {
+    case 'nextjs':
+      return generateNextJsStructure(projectName, componentCode, language);
+    case 'react-vite':
+      return generateViteStructure(projectName, componentCode, language);
+    case 'react-cra':
+      return generateCRAStructure(projectName, componentCode, language);
+    default:
+      throw new Error(`Unsupported framework: ${framework}`);
+  }
+}
+
+function generateNextJsStructure(projectName: string, componentCode: string, language: string) {
+  const isTypeScript = language === 'tsx' || language === 'typescript';
+  const ext = isTypeScript ? 'tsx' : 'jsx';
+  
+  return {
+    'package.json': JSON.stringify({
+      name: projectName,
+      version: "0.1.0",
+      private: true,
+      scripts: {
+        dev: "next dev",
+        build: "next build",
+        start: "next start",
+        lint: "next lint"
+      },
+      dependencies: {
+        react: "^18",
+        "react-dom": "^18",
+        next: "14.0.0",
+        ...(isTypeScript && {
+          "@types/node": "^20",
+          "@types/react": "^18",
+          "@types/react-dom": "^18",
+          typescript: "^5"
+        }),
+        "tailwindcss": "^3.3.0",
+        "autoprefixer": "^10.4.14",
+        "postcss": "^8.4.24",
+        "lucide-react": "latest",
+        "class-variance-authority": "latest",
+        "clsx": "latest",
+        "tailwind-merge": "latest",
+        "@radix-ui/react-slot": "^1.0.2"
+      }
+    }, null, 2),
+    
+    [`app/page.${ext}`]: `import GeneratedApp from '@/components/generated-app'
+
+export default function Home() {
+  return <GeneratedApp />
+}`,
+
+    [`components/generated-app.${ext}`]: componentCode,
+    
+    'app/layout.tsx': `import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
+
+const inter = Inter({ subsets: ['latin'] })
+
+export const metadata: Metadata = {
+  title: '${projectName}',
+  description: 'Generated with LlamaCoder',
+}
+
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode
+}) {
+  return (
+    <html lang="en">
+      <body className={inter.className}>{children}</body>
+    </html>
+  )
+}`,
+
+    'app/globals.css': getTailwindCSS(),
+    'tailwind.config.js': getTailwindConfig(),
+    'postcss.config.js': getPostCSSConfig(),
+    'next.config.js': getNextConfig(),
+    ...(isTypeScript && { 'tsconfig.json': getTypeScriptConfig() }),
+    'README.md': getReadme(projectName, 'Next.js'),
+    '.gitignore': getGitIgnore('nextjs')
+  };
+}
+
+function generateViteStructure(projectName: string, componentCode: string, language: string) {
+  const isTypeScript = language === 'tsx' || language === 'typescript';
+  const ext = isTypeScript ? 'tsx' : 'jsx';
+  
+  return {
+    'package.json': JSON.stringify({
+      name: projectName,
+      private: true,
+      version: "0.0.0",
+      type: "module",
+      scripts: {
+        dev: "vite",
+        build: "vite build",
+        preview: "vite preview"
+      },
+      dependencies: {
+        react: "^18.2.0",
+        "react-dom": "^18.2.0",
+        "tailwindcss": "^3.3.0",
+        "autoprefixer": "^10.4.14",
+        "postcss": "^8.4.24",
+        "lucide-react": "latest",
+        "class-variance-authority": "latest",
+        "clsx": "latest",
+        "tailwind-merge": "latest",
+        "@radix-ui/react-slot": "^1.0.2"
+      },
+      devDependencies: {
+        "@types/react": "^18.2.15",
+        "@types/react-dom": "^18.2.7",
+        "@vitejs/plugin-react": "^4.0.3",
+        ...(isTypeScript && { typescript: "^5.0.2" }),
+        vite: "^4.4.5"
+      }
+    }, null, 2),
+    
+    [`src/App.${ext}`]: componentCode.replace('export default', 'export default'),
+    
+    'src/main.tsx': `import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from './App.${ext === 'jsx' ? 'jsx' : 'tsx'}'
+import './index.css'
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+)`,
+
+    'src/index.css': getTailwindCSS(),
+    'index.html': getViteHTML(projectName),
+    'vite.config.ts': getViteConfig(),
+    'tailwind.config.js': getTailwindConfig(),
+    'postcss.config.js': getPostCSSConfig(),
+    ...(isTypeScript && { 'tsconfig.json': getViteTypeScriptConfig() }),
+    'README.md': getReadme(projectName, 'Vite'),
+    '.gitignore': getGitIgnore('vite')
+  };
+}
+
+function generateCRAStructure(projectName: string, componentCode: string, language: string) {
+  const isTypeScript = language === 'tsx' || language === 'typescript';
+  const ext = isTypeScript ? 'tsx' : 'jsx';
+  
+  return {
+    'package.json': JSON.stringify({
+      name: projectName,
+      version: "0.1.0",
+      private: true,
+      dependencies: {
+        "@testing-library/jest-dom": "^5.16.4",
+        "@testing-library/react": "^13.3.0",
+        "@testing-library/user-event": "^13.5.0",
+        react: "^18.2.0",
+        "react-dom": "^18.2.0",
+        "react-scripts": "5.0.1",
+        "web-vitals": "^2.1.4",
+        ...(isTypeScript && {
+          "@types/jest": "^27.5.2",
+          "@types/node": "^16.11.56",
+          "@types/react": "^18.0.17",
+          "@types/react-dom": "^18.0.6",
+          typescript: "^4.7.4"
+        }),
+        "tailwindcss": "^3.3.0",
+        "autoprefixer": "^10.4.14",
+        "postcss": "^8.4.24",
+        "lucide-react": "latest",
+        "class-variance-authority": "latest",
+        "clsx": "latest",
+        "tailwind-merge": "latest",
+        "@radix-ui/react-slot": "^1.0.2"
+      },
+      scripts: {
+        start: "react-scripts start",
+        build: "react-scripts build",
+        test: "react-scripts test",
+        eject: "react-scripts eject"
+      },
+      eslintConfig: {
+        extends: ["react-app", "react-app/jest"]
+      },
+      browserslist: {
+        production: [">0.2%", "not dead", "not op_mini all"],
+        development: ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
+      }
+    }, null, 2),
+    
+    [`src/App.${ext}`]: componentCode,
+    'src/index.tsx': getCRAIndex(),
+    'src/index.css': getTailwindCSS(),
+    'public/index.html': getCRAHTML(projectName),
+    'tailwind.config.js': getTailwindConfig(),
+    'postcss.config.js': getPostCSSConfig(),
+    ...(isTypeScript && { 'tsconfig.json': getCRATypeScriptConfig() }),
+    'README.md': getReadme(projectName, 'Create React App'),
+    '.gitignore': getGitIgnore('cra')
+  };
+}
+
+// Helper functions for generating config files
+function getTailwindCSS() {
+  return `@tailwind base;
+@tailwind components;
+@tailwind utilities;`;
+}
+
+function getTailwindConfig() {
+  return `/** @type {import('tailwindcss').Config} */
+module.exports = {
+  content: [
+    "./src/**/*.{js,jsx,ts,tsx}",
+    "./app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./pages/**/*.{js,ts,jsx,tsx,mdx}",
+    "./components/**/*.{js,ts,jsx,tsx,mdx}",
+  ],
+  theme: {
+    extend: {},
+  },
+  plugins: [],
+}`;
+}
+
+function getPostCSSConfig() {
+  return `module.exports = {
+  plugins: {
+    tailwindcss: {},
+    autoprefixer: {},
+  },
+}`;
+}
+
+function getNextConfig() {
+  return `/** @type {import('next').NextConfig} */
+const nextConfig = {}
+
+module.exports = nextConfig`;
+}
+
+function getViteConfig() {
+  return `import { defineConfig } from 'vite'
+import react from '@vitejs/plugin-react'
+
+// https://vitejs.dev/config/
+export default defineConfig({
+  plugins: [react()],
+})`;
+}
+
+function getViteHTML(projectName: string) {
+  return `<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>${projectName}</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>`;
+}
+
+function getCRAHTML(projectName: string) {
+  return `<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="Generated with LlamaCoder" />
+    <title>${projectName}</title>
+  </head>
+  <body>
+    <noscript>You need to enable JavaScript to run this app.</noscript>
+    <div id="root"></div>
+  </body>
+</html>`;
+}
+
+function getCRAIndex() {
+  return `import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from './App';
+
+const root = ReactDOM.createRoot(
+  document.getElementById('root') as HTMLElement
+);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);`;
+}
+
+function getTypeScriptConfig() {
+  return JSON.stringify({
+    compilerOptions: {
+      target: "es5",
+      lib: ["dom", "dom.iterable", "es6"],
+      allowJs: true,
+      skipLibCheck: true,
+      strict: true,
+      noEmit: true,
+      esModuleInterop: true,
+      module: "esnext",
+      moduleResolution: "bundler",
+      resolveJsonModule: true,
+      isolatedModules: true,
+      jsx: "preserve",
+      incremental: true,
+      plugins: [
+        {
+          name: "next"
+        }
+      ],
+      paths: {
+        "@/*": ["./*"]
+      }
+    },
+    include: ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
+    exclude: ["node_modules"]
+  }, null, 2);
+}
+
+function getViteTypeScriptConfig() {
+  return JSON.stringify({
+    compilerOptions: {
+      target: "ES2020",
+      useDefineForClassFields: true,
+      lib: ["ES2020", "DOM", "DOM.Iterable"],
+      module: "ESNext",
+      skipLibCheck: true,
+      moduleResolution: "bundler",
+      allowImportingTsExtensions: true,
+      resolveJsonModule: true,
+      isolatedModules: true,
+      noEmit: true,
+      jsx: "react-jsx",
+      strict: true,
+      noUnusedLocals: true,
+      noUnusedParameters: true,
+      noFallthroughCasesInSwitch: true
+    },
+    include: ["src"],
+    references: [{ path: "./tsconfig.node.json" }]
+  }, null, 2);
+}
+
+function getCRATypeScriptConfig() {
+  return JSON.stringify({
+    compilerOptions: {
+      target: "es5",
+      lib: ["dom", "dom.iterable", "es6"],
+      allowJs: true,
+      skipLibCheck: true,
+      esModuleInterop: true,
+      allowSyntheticDefaultImports: true,
+      strict: true,
+      forceConsistentCasingInFileNames: true,
+      noFallthroughCasesInSwitch: true,
+      module: "esnext",
+      moduleResolution: "node",
+      resolveJsonModule: true,
+      isolatedModules: true,
+      noEmit: true,
+      jsx: "react-jsx"
+    },
+    include: ["src"]
+  }, null, 2);
+}
+
+function getReadme(projectName: string, framework: string) {
+  return `# ${projectName}
+
+This project was generated with [LlamaCoder](https://llamacoder.io) and exported as a ${framework} application.
+
+## Getting Started
+
+First, install the dependencies:
+
+\`\`\`bash
+npm install
+\`\`\`
+
+Then, run the development server:
+
+\`\`\`bash
+npm run dev
+\`\`\`
+
+## Deploy on Vercel
+
+The easiest way to deploy your app is to use the [Vercel Platform](https://vercel.com/new).
+
+Check out the deployment documentation for more details.
+
+## Generated with LlamaCoder
+
+This app was generated using AI with [LlamaCoder](https://llamacoder.io).
+`;
+}
+
+function getGitIgnore(framework: string) {
+  const common = `# Dependencies
+node_modules
+/.pnp
+.pnp.js
+
+# Testing
+/coverage
+
+# Production
+/build
+/dist
+
+# Misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Editor
+.vscode
+.idea`;
+
+  if (framework === 'nextjs') {
+    return `${common}
+
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+
+# Vercel
+.vercel`;
+  }
+
+  return common;
+}

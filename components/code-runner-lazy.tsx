@@ -14,7 +14,7 @@ export default function LazyCodeRunner({
   code: string;
   onRequestFix?: (e: string) => void;
 }) {
-  const [shouldLoadSandpack, setShouldLoadSandpack] = useState(false);
+  const [shouldLoadSandpack, setShouldLoadSandpack] = useState(true);
 
   if (!shouldLoadSandpack) {
     return (

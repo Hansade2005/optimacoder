@@ -4,12 +4,19 @@ import ChevronLeftIcon from "@/components/icons/chevron-left";
 import ChevronRightIcon from "@/components/icons/chevron-right";
 import CloseIcon from "@/components/icons/close-icon";
 import RefreshIcon from "@/components/icons/refresh";
-import { extractFirstCodeBlock, splitByFirstCodeFence } from "@/lib/utils";
+import { extractFirstCodeBlock, splitByFirstCodeFence, parseCodeBlocksToProject } from "@/lib/utils";
 import { useState } from "react";
 import type { Chat, Message } from "./page";
 import { Share } from "./share";
 import { StickToBottom } from "use-stick-to-bottom";
 import dynamic from "next/dynamic";
+import {
+  SandpackProvider,
+  SandpackFileExplorer,
+  SandpackCodeEditor,
+  SandpackConsole,
+  SandpackPreview,
+} from "@codesandbox/sandpack-react/unstyled";
 
 const ExportToGitHub = dynamic(() => import("@/components/export-to-github"), {
   ssr: false,
@@ -26,6 +33,105 @@ const SyntaxHighlighter = dynamic(
     loading: () => <div className="flex items-center justify-center p-4">Loading syntax highlighter...</div>
   },
 );
+
+// Multifile Code Editor Component
+function MultiFileCodeEditor({ project, isGenerating }: { project: any, isGenerating: boolean }) {
+  // Convert project files to Sandpack format
+  const sandpackFiles: Record<string, string> = {};
+  
+  project.files.forEach((file: any) => {
+    sandpackFiles[file.path] = file.content;
+  });
+
+  return (
+    <SandpackProvider
+      key={JSON.stringify(project)}
+      template={project.template}
+      files={sandpackFiles}
+      className="h-full"
+    >
+      <div className="flex h-full bg-white">
+        <div className="w-64 border-r border-gray-300 bg-gray-50">
+          <SandpackFileExplorer className="h-full w-full" />
+        </div>
+        <div className="flex-1 bg-white">
+          <SandpackCodeEditor 
+            closableTabs 
+            showTabs 
+            className="h-full w-full"
+            readOnly={isGenerating}
+          />
+        </div>
+      </div>
+    </SandpackProvider>
+  );
+}
+
+// Preview with Console Component - Custom implementation
+function PreviewWithConsole({ 
+  language, 
+  code, 
+  onRequestFix, 
+  refresh 
+}: { 
+  language: string; 
+  code: string; 
+  onRequestFix: (e: string) => void; 
+  refresh: number; 
+}) {
+  // Use the same logic as ReactCodeRunner but add console
+  const fullContent = code;
+  const parsedProject = parseCodeBlocksToProject(fullContent);
+  const isMultiFile = parsedProject.files.length > 1;
+  
+  let finalProject = isMultiFile ? parsedProject : {
+    template: 'react-ts' as const,
+    files: [{ path: '/App.tsx', content: code }],
+    mainFile: '/App.tsx'
+  };
+
+  // Convert project files to Sandpack format
+  const sandpackFiles: Record<string, string> = {};
+  finalProject.files.forEach((file: any) => {
+    sandpackFiles[file.path] = file.content;
+  });
+
+  return (
+    <SandpackProvider
+      key={JSON.stringify(finalProject) + refresh}
+      template={finalProject.template}
+      files={sandpackFiles}
+      className="h-full w-full"
+      customSetup={{
+        dependencies: {
+          "lucide-react": "latest",
+          "framer-motion": "latest",
+        },
+      }}
+    >
+      <div className="flex h-full flex-col bg-white">
+        <div className="flex-1 overflow-hidden bg-white">
+          <SandpackPreview
+            showNavigator={false}
+            showOpenInCodeSandbox={false}
+            showRefreshButton={false}
+            showRestartButton={false}
+            showOpenNewtab={false}
+            className="h-full w-full"
+          />
+        </div>
+        <div className="h-48 border-t border-gray-300 bg-white">
+          <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-700">
+            Console
+          </div>
+          <div className="h-40 overflow-y-auto bg-white">
+            <SandpackConsole className="h-full w-full" />
+          </div>
+        </div>
+      </div>
+    </SandpackProvider>
+  );
+}
 
 export default function CodeViewer({
   chat,
@@ -59,6 +165,12 @@ export default function CodeViewer({
   const code = streamApp ? streamApp.content : app?.code || "";
   const language = streamApp ? streamApp.language : app?.language || "";
   const title = streamApp ? streamApp.filename.name : app?.filename?.name || "";
+  
+  // Check if we have a multifile project
+  const fullContent = streamText || (message?.content || "");
+  const parsedProject = parseCodeBlocksToProject(fullContent);
+  const isMultiFile = parsedProject.files.length > 1;
+  
   const layout = ["python", "ts", "js", "javascript", "typescript"].includes(
     language,
   )
@@ -118,26 +230,31 @@ export default function CodeViewer({
       {layout === "tabbed" ? (
         <div className="flex grow flex-col overflow-y-auto bg-white">
           {activeTab === "code" ? (
-            <StickToBottom
-              className="relative grow overflow-hidden"
-              resize="smooth"
-              initial={streamAppIsGenerating ? "smooth" : false}
-            >
-              <StickToBottom.Content>
-                <SyntaxHighlighter code={code} language={language} />
-              </StickToBottom.Content>
-            </StickToBottom>
+            isMultiFile ? (
+              <MultiFileCodeEditor 
+                project={parsedProject} 
+                isGenerating={streamAppIsGenerating}
+              />
+            ) : (
+              <StickToBottom
+                className="relative grow overflow-hidden"
+                resize="smooth"
+                initial={streamAppIsGenerating ? "smooth" : false}
+              >
+                <StickToBottom.Content>
+                  <SyntaxHighlighter code={code} language={language} />
+                </StickToBottom.Content>
+              </StickToBottom>
+            )
           ) : (
             <>
               {language && (
-                <div className="flex h-full items-center justify-center">
-                  <CodeRunner
-                    onRequestFix={onRequestFix}
-                    language={language}
-                    code={code}
-                    key={refresh}
-                  />
-                </div>
+                <PreviewWithConsole
+                  language={language}
+                  code={code}
+                  onRequestFix={onRequestFix}
+                  refresh={refresh}
+                />
               )}
             </>
           )}

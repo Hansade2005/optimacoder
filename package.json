@@ -40,6 +40,7 @@
     "react": "^19",
     "react-dom": "^19",
     "react-markdown": "^9.0.3",
+    "sandpack-file-explorer": "^0.0.7",
     "shiki": "^1.27.2",
     "sonner": "^1.7.2",
     "tailwind-merge": "^2.6.0",

@@ -12,11 +12,11 @@ import { StickToBottom } from "use-stick-to-bottom";
 import dynamic from "next/dynamic";
 import {
   SandpackProvider,
-  SandpackFileExplorer,
   SandpackCodeEditor,
   SandpackConsole,
   SandpackPreview,
-} from "@codesandbox/sandpack-react/unstyled";
+} from "@codesandbox/sandpack-react";
+import { SandpackFileExplorer } from "sandpack-file-explorer";
 
 const ExportToGitHub = dynamic(() => import("@/components/export-to-github"), {
   ssr: false,
@@ -48,7 +48,6 @@ function MultiFileCodeEditor({ project, isGenerating }: { project: any, isGenera
       key={JSON.stringify(project)}
       template={project.template}
       files={sandpackFiles}
-      className="h-full"
     >
       <div className="flex h-full bg-white">
         <div className="w-64 border-r border-gray-300 bg-gray-50">
@@ -79,6 +78,8 @@ function PreviewWithConsole({
   onRequestFix: (e: string) => void; 
   refresh: number; 
 }) {
+  const [isConsoleCollapsed, setIsConsoleCollapsed] = useState(false);
+  
   // Use the same logic as ReactCodeRunner but add console
   const fullContent = code;
   const parsedProject = parseCodeBlocksToProject(fullContent);
@@ -101,7 +102,6 @@ function PreviewWithConsole({
       key={JSON.stringify(finalProject) + refresh}
       template={finalProject.template}
       files={sandpackFiles}
-      className="h-full w-full"
       customSetup={{
         dependencies: {
           "lucide-react": "latest",
@@ -120,13 +120,26 @@ function PreviewWithConsole({
             className="h-full w-full"
           />
         </div>
-        <div className="h-48 border-t border-gray-300 bg-white">
-          <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-700">
-            Console
-          </div>
-          <div className="h-40 overflow-y-auto bg-white">
-            <SandpackConsole className="h-full w-full" />
-          </div>
+        <div className={`border-t border-gray-300 bg-white transition-all duration-300 ${isConsoleCollapsed ? 'h-12' : 'h-48'}`}>
+          <button
+            onClick={() => setIsConsoleCollapsed(!isConsoleCollapsed)}
+            className="w-full px-4 py-2 bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-100 transition-colors duration-200 flex items-center justify-between"
+          >
+            <span>Console</span>
+            <svg 
+              className={`size-4 transition-transform duration-200 ${isConsoleCollapsed ? 'rotate-180' : ''}`}
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          {!isConsoleCollapsed && (
+            <div className="h-40 overflow-y-auto bg-white">
+              <SandpackConsole className="h-full w-full" />
+            </div>
+          )}
         </div>
       </div>
     </SandpackProvider>

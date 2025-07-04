@@ -14,6 +14,8 @@ export async function createChat(
   model: string,
   quality: "high" | "low",
   screenshotUrl: string | undefined,
+  isMultiFile?: boolean,
+  template?: string,
 ) {
   const prisma = getPrisma();
   const chat = await prisma.chat.create({
@@ -155,7 +157,7 @@ export async function createChat(
           data: [
             {
               role: "system",
-              content: getMainCodingPrompt(mostSimilarExample),
+              content: getMainCodingPrompt(mostSimilarExample, isMultiFile, template),
               position: 0,
             },
             { role: "user", content: userMessage, position: 1 },

@@ -3,11 +3,11 @@
 import React from 'react';
 import {
   SandpackProvider,
-  SandpackFileExplorer,
   SandpackCodeEditor,
   SandpackConsole,
   SandpackPreview,
-} from "@codesandbox/sandpack-react/unstyled";
+} from "@codesandbox/sandpack-react";
+import { SandpackFileExplorer } from "sandpack-file-explorer";
 
 // Test multifile project
 const testProject = {

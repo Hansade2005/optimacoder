@@ -50,15 +50,15 @@ function MultiFileCodeEditor({ project, isGenerating }: { project: any, isGenera
       files={sandpackFiles}
       className="h-full"
     >
-      <div className="flex h-full">
-        <div className="w-64 border-r border-gray-300">
-          <SandpackFileExplorer className="h-full" />
+      <div className="flex h-full bg-white">
+        <div className="w-64 border-r border-gray-300 bg-gray-50">
+          <SandpackFileExplorer className="h-full w-full" />
         </div>
-        <div className="flex-1">
+        <div className="flex-1 bg-white">
           <SandpackCodeEditor 
             closableTabs 
             showTabs 
-            className="h-full"
+            className="h-full w-full"
             readOnly={isGenerating}
           />
         </div>
@@ -101,7 +101,7 @@ function PreviewWithConsole({
       key={JSON.stringify(finalProject) + refresh}
       template={finalProject.template}
       files={sandpackFiles}
-      className="h-full"
+      className="h-full w-full"
       customSetup={{
         dependencies: {
           "lucide-react": "latest",
@@ -109,8 +109,8 @@ function PreviewWithConsole({
         },
       }}
     >
-      <div className="flex h-full flex-col">
-        <div className="flex-1 overflow-hidden">
+      <div className="flex h-full flex-col bg-white">
+        <div className="flex-1 overflow-hidden bg-white">
           <SandpackPreview
             showNavigator={false}
             showOpenInCodeSandbox={false}
@@ -120,12 +120,12 @@ function PreviewWithConsole({
             className="h-full w-full"
           />
         </div>
-        <div className="h-48 border-t border-gray-300">
+        <div className="h-48 border-t border-gray-300 bg-white">
           <div className="px-4 py-2 bg-gray-50 border-b border-gray-200 text-sm font-medium text-gray-700">
             Console
           </div>
-          <div className="h-40 overflow-y-auto">
-            <SandpackConsole className="h-full" />
+          <div className="h-40 overflow-y-auto bg-white">
+            <SandpackConsole className="h-full w-full" />
           </div>
         </div>
       </div>

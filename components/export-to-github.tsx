@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from 
 '@/components/ui/card';
@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import { Github, ExternalLink, Loader2 } from 'lucide-react';
+import { Github, ExternalLink, Loader2, CheckCircle } from 'lucide-react';
 import { FrameworkType } from '@/lib/utils';
 
 interface ExportToGitHubProps {
@@ -16,6 +16,12 @@ interface ExportToGitHubProps {
   language: string;
   isOpen: boolean;
   onClose: () => void;
+}
+
+interface GitHubAuthStatus {
+  authenticated: boolean;
+  username?: string;
+  token?: string;
 }
 
 export default function ExportToGitHub({ 
@@ -26,15 +32,52 @@ export default function ExportToGitHub({
 }: ExportToGitHubProps) {
   const [framework, setFramework] = useState<FrameworkType>('nextjs');
   const [projectName, setProjectName] = useState('');
-  const [githubToken, setGithubToken] = useState('');
-  const [githubUsername, setGithubUsername] = useState('');
   const [isExporting, setIsExporting] = useState(false);
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState('');
+  const [authStatus, setAuthStatus] = useState<GitHubAuthStatus>({ authenticated: false });
+  const [checkingAuth, setCheckingAuth] = useState(true);
+
+  // Check GitHub authentication status
+  useEffect(() => {
+    if (isOpen) {
+      checkAuthStatus();
+    }
+  }, [isOpen]);
+
+  const checkAuthStatus = async () => {
+    try {
+      const response = await fetch('/api/auth/github/status');
+      const data = await response.json();
+      setAuthStatus(data);
+    } catch (error) {
+      setAuthStatus({ authenticated: false });
+    } finally {
+      setCheckingAuth(false);
+    }
+  };
+
+  const handleGitHubAuth = () => {
+    window.location.href = '/api/auth/github?action=authorize';
+  };
+
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/auth/github/status', { method: 'DELETE' });
+      setAuthStatus({ authenticated: false });
+    } catch (error) {
+      console.error('Logout error:', error);
+    }
+  };
 
   const handleExport = async () => {
-    if (!projectName || !githubToken || !githubUsername) {
-      setError('Please fill in all required fields');
+    if (!projectName) {
+      setError('Please enter a project name');
+      return;
+    }
+
+    if (!authStatus.authenticated || !authStatus.token || !authStatus.username) {
+      setError('Please authenticate with GitHub first');
       return;
     }
 
@@ -52,8 +95,8 @@ export default function ExportToGitHub({
           projectName,
           componentCode,
           language,
-          githubToken,
-          githubUsername
+          githubToken: authStatus.token,
+          githubUsername: authStatus.username
         })
       });
 
@@ -109,37 +152,35 @@ export default function ExportToGitHub({
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="githubUsername">GitHub Username</Label>
-                <Input
-                  id="githubUsername"
-                  value={githubUsername}
-                  onChange={(e) => setGithubUsername(e.target.value)}
-                  placeholder="your-github-username"
-                />
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="githubToken">GitHub Personal Access Token</Label>
-                <Input
-                  id="githubToken"
-                  type="password"
-                  value={githubToken}
-                  onChange={(e) => setGithubToken(e.target.value)}
-                  placeholder="ghp_xxxxxxxxxxxx"
-                />
-                <p className="text-xs text-gray-500">
-                  Create a token at{' '}
-                  <a 
-                    href="https://github.com/settings/tokens" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-blue-500 hover:underline"
-                  >
-                    GitHub Settings
-                  </a>
-                  {' '}with &apos;repo&apos; permissions
-                </p>
+              {/* GitHub Authentication Section */}
+              <div className="space-y-3 p-4 border rounded-lg bg-gray-50">
+                <Label className="text-sm font-medium">GitHub Authentication</Label>
+                {checkingAuth ? (
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Checking authentication...
+                  </div>
+                ) : authStatus.authenticated ? (
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-green-700">
+                      <CheckCircle className="w-4 h-4" />
+                      Authenticated as <strong>{authStatus.username}</strong>
+                    </div>
+                    <Button onClick={handleLogout} className="border border-gray-300 bg-white text-gray-800 hover:bg-gray-100 text-sm px-3 py-1">
+                      Sign Out
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    <p className="text-sm text-gray-600">
+                      Sign in with GitHub to automatically create and deploy your repository
+                    </p>
+                    <Button onClick={handleGitHubAuth} className="w-full">
+                      <Github className="w-4 h-4 mr-2" />
+                      Sign in with GitHub
+                    </Button>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-2">

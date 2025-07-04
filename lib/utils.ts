@@ -1,5 +1,14 @@
-import { clsx, type ClassValue } from "clsx";
+import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import {
+  utils as shadcnUtils,
+  button as shadcnButton,
+  card as shadcnCard,
+  input as shadcnInput,
+  label as shadcnLabel,
+  textarea as shadcnTextarea,
+  select as shadcnSelect,
+} from "./shadcn-essential";
 
 export function extractFirstCodeBlock(input: string) {
   // 1) We use a more general pattern for the code fence:
@@ -184,6 +193,30 @@ export interface ExportConfig {
   dependencies?: string[];
 }
 
+function normalizeImportPaths(code: string, framework: FrameworkType): string {
+  // Fix import paths based on framework
+  let normalizedCode = code;
+  
+  switch (framework) {
+    case 'nextjs':
+      // Replace absolute paths starting with / with @/ for Next.js
+      normalizedCode = normalizedCode.replace(/from ['"]\/components\//g, 'from "@/components/');
+      normalizedCode = normalizedCode.replace(/from ['"]\/lib\//g, 'from "@/lib/');
+      normalizedCode = normalizedCode.replace(/from ['"]\/utils/g, 'from "@/lib/utils');
+      break;
+      
+    case 'react-vite':
+    case 'react-cra':
+      // Replace absolute paths with relative paths for Vite/CRA
+      normalizedCode = normalizedCode.replace(/from ['"]\/components\//g, 'from "./');
+      normalizedCode = normalizedCode.replace(/from ['"]\/lib\//g, 'from "../lib/');
+      normalizedCode = normalizedCode.replace(/from ['"]\/utils/g, 'from "../lib/utils');
+      break;
+  }
+  
+  return normalizedCode;
+}
+
 export function generateFrameworkStructure(config: ExportConfig) {
   const { framework, projectName, componentCode, language } = config;
 
@@ -202,6 +235,7 @@ export function generateFrameworkStructure(config: ExportConfig) {
 function generateNextJsStructure(projectName: string, componentCode: string, language: string) {
   const isTypeScript = language === 'tsx' || language === 'typescript';
   const ext = isTypeScript ? 'tsx' : 'jsx';
+  const normalizedCode = normalizeImportPaths(componentCode, 'nextjs');
   
   return {
     'package.json': JSON.stringify({
@@ -241,7 +275,7 @@ export default function Home() {
   return <GeneratedApp />
 }`,
 
-    [`components/generated-app.${ext}`]: componentCode,
+    [`components/generated-app.${ext}`]: normalizedCode,
     
     'app/layout.tsx': `import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
@@ -270,6 +304,13 @@ export default function RootLayout({
     'tailwind.config.js': getTailwindConfig(),
     'postcss.config.js': getPostCSSConfig(),
     'next.config.js': getNextConfig(),
+    'lib/utils.ts': getShadcnEssentialUtils(),
+    'components/ui/button.tsx': getShadcnEssentialButton(),
+    'components/ui/card.tsx': getShadcnEssentialCard(),
+    'components/ui/input.tsx': getShadcnEssentialInput(),
+    'components/ui/label.tsx': getShadcnEssentialLabel(),
+    'components/ui/textarea.tsx': getShadcnEssentialTextarea(),
+    'components/ui/select.tsx': getShadcnEssentialSelect(),
     ...(isTypeScript && { 'tsconfig.json': getTypeScriptConfig() }),
     'README.md': getReadme(projectName, 'Next.js'),
     '.gitignore': getGitIgnore('nextjs')
@@ -279,6 +320,7 @@ export default function RootLayout({
 function generateViteStructure(projectName: string, componentCode: string, language: string) {
   const isTypeScript = language === 'tsx' || language === 'typescript';
   const ext = isTypeScript ? 'tsx' : 'jsx';
+  const normalizedCode = normalizeImportPaths(componentCode, 'react-vite');
   
   return {
     'package.json': JSON.stringify({
@@ -312,7 +354,7 @@ function generateViteStructure(projectName: string, componentCode: string, langu
       }
     }, null, 2),
     
-    [`src/App.${ext}`]: componentCode.replace('export default', 'export default'),
+    [`src/App.${ext}`]: normalizedCode,
     
     'src/main.tsx': `import React from 'react'
 import ReactDOM from 'react-dom/client'
@@ -339,6 +381,7 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
 function generateCRAStructure(projectName: string, componentCode: string, language: string) {
   const isTypeScript = language === 'tsx' || language === 'typescript';
   const ext = isTypeScript ? 'tsx' : 'jsx';
+  const normalizedCode = normalizeImportPaths(componentCode, 'react-cra');
   
   return {
     'package.json': JSON.stringify({
@@ -384,7 +427,7 @@ function generateCRAStructure(projectName: string, componentCode: string, langua
       }
     }, null, 2),
     
-    [`src/App.${ext}`]: componentCode,
+    [`src/App.${ext}`]: normalizedCode,
     'src/index.tsx': getCRAIndex(),
     'src/index.css': getTailwindCSS(),
     'public/index.html': getCRAHTML(projectName),
@@ -394,6 +437,35 @@ function generateCRAStructure(projectName: string, componentCode: string, langua
     'README.md': getReadme(projectName, 'Create React App'),
     '.gitignore': getGitIgnore('cra')
   };
+}
+
+// Helper functions to get shadcn components
+function getShadcnEssentialUtils() {
+  return shadcnUtils;
+}
+
+function getShadcnEssentialButton() {
+  return shadcnButton;
+}
+
+function getShadcnEssentialCard() {
+  return shadcnCard;
+}
+
+function getShadcnEssentialInput() {
+  return shadcnInput;
+}
+
+function getShadcnEssentialLabel() {
+  return shadcnLabel;
+}
+
+function getShadcnEssentialTextarea() {
+  return shadcnTextarea;
+}
+
+function getShadcnEssentialSelect() {
+  return shadcnSelect;
 }
 
 // Helper functions for generating config files

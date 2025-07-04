@@ -26,7 +26,7 @@ Describe the attached screenshot in detail. I will send what you give me to a de
 - Make sure to use the exact text from the screenshot.
 `;
 
-export function getMainCodingPrompt(mostSimilarExample: string) {
+export function getMainCodingPrompt(mostSimilarExample: string, isMultiFile?: boolean, template?: string) {
   let systemPrompt = `
   # LlamaCoder Instructions
 
@@ -36,11 +36,17 @@ export function getMainCodingPrompt(mostSimilarExample: string) {
 
   Follow the following instructions very carefully:
     - Before generating a React project, think through the right requirements, structure, styling, images, and formatting
-    - Create a React component for whatever the user asked you to create and make sure it can run by itself by using a default export
-    - Make sure the React app is interactive and functional by creating state when needed and having no required props
+    ${isMultiFile ? 
+      `- Create a complete multifile ${template || 'React'} project with proper file structure and organization
+    - Generate multiple files as needed for components, utilities, types, etc.
+    - Use proper file naming conventions and organize files logically
+    - Each file should be complete and functional with proper imports/exports
+    - Structure the project according to ${template || 'React'} best practices` :
+      `- Create a React component for whatever the user asked you to create and make sure it can run by itself by using a default export
+    - Make sure the React app is interactive and functional by creating state when needed and having no required props`}
     - If you use any imports from React like useState or useEffect, make sure to import them directly
     - Do not include any external API calls
-    - Use TypeScript as the language for the React component
+    ${isMultiFile && template?.includes('ts') ? '- Use TypeScript for all files' : '- Use TypeScript as the language for the React component'}
     - Use Tailwind classes for styling. DO NOT USE ARBITRARY VALUES (e.g. \`h-[600px]\`).
     - Use Tailwind margin and padding classes to make sure components are spaced out nicely and follow good design principles
     - Write complete code that can be copied/pasted directly. Do not write partial code or include comments for users to finish the code
@@ -91,7 +97,21 @@ export function getMainCodingPrompt(mostSimilarExample: string) {
 
   NO OTHER LIBRARIES ARE INSTALLED OR ABLE TO BE IMPORTED (such as zod, hookform, react-router) BESIDES THOSE SPECIFIED ABOVE.
 
-  Explain your work. The first codefence should be the main React component. It should also use "tsx" as the language, and be followed by a sensible filename for the code (please use kebab-case for file names). Use this format: \`\`\`tsx{filename=calculator.tsx}.
+  ${isMultiFile ? 
+    `Explain your work and create a complete multifile project. Generate multiple code blocks for different files using this format:
+    
+    For each file, use: \`\`\`tsx{filename=path/to/file.tsx} or \`\`\`ts{filename=path/to/file.ts}
+    
+    Structure your project according to ${template || 'React'} conventions:
+    - Main entry point (App.tsx, index.tsx, or template-specific)
+    - Component files (components/)
+    - Utility files (lib/, utils/, or similar)
+    - Type definitions if needed (types/, or inline)
+    - Configuration files if relevant to the template
+    
+    Make sure all imports are correctly structured and files export/import from each other properly.
+    Use relative imports between your custom files and absolute imports for UI components.` :
+    `Explain your work. The first codefence should be the main React component. It should also use "tsx" as the language, and be followed by a sensible filename for the code (please use kebab-case for file names). Use this format: \`\`\`tsx{filename=calculator.tsx}.`}
 
   # Examples
 

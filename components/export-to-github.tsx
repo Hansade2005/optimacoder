@@ -138,7 +138,7 @@ export default function ExportToGitHub({
                   >
                     GitHub Settings
                   </a>
-                  {' '}with 'repo' permissions
+                  {' '}with &apos;repo&apos; permissions
                 </p>
               </div>
 

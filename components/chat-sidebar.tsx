@@ -56,7 +56,7 @@ export default function ChatSidebar({
     checkMobile();
     window.addEventListener('resize', checkMobile);
     return () => window.removeEventListener('resize', checkMobile);
-  }, []);
+  }, [setIsCollapsed]);
 
   // Filter chats based on search query
   const filteredChats = chats.filter(chat =>

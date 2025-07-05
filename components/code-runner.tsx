@@ -1,40 +1,22 @@
-// import {
-//   runJavaScriptCode,
-//   runPythonCode,
-// } from "@/components/code-runner-actions";
-// import CodeRunnerServerAction from "@/components/code-runner-server-action";
 import LazyCodeRunner from "./code-runner-lazy";
+import { ReactNode } from "react";
 
 export default function CodeRunner({
   language,
   code,
   template,
   onRequestFix,
+  children
 }: {
   language: string;
   code: string;
   template?: string;
   onRequestFix?: (e: string) => void;
+  children?: ReactNode;
 }) {
-  return <LazyCodeRunner language={language} code={code} template={template} onRequestFix={onRequestFix} />;
-
-  // return (
-  //   <>
-  //     {language === "python" ? (
-  //       <CodeRunnerServerAction
-  //         code={code}
-  //         runCodeAction={runPythonCode}
-  //         key={code}
-  //       />
-  //     ) : ["ts", "js", "javascript", "typescript"].includes(language) ? (
-  //       <CodeRunnerServerAction
-  //         code={code}
-  //         runCodeAction={runJavaScriptCode}
-  //         key={code}
-  //       />
-  //     ) : (
-  //       <CodeRunnerReact code={code} />
-  //     )}
-  //   </>
-  // );
+  return (
+    <LazyCodeRunner language={language} code={code} template={template} onRequestFix={onRequestFix}>
+      {children}
+    </LazyCodeRunner>
+  );
 }

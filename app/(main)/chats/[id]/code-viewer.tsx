@@ -11,21 +11,12 @@ import { Share } from "./share";
 import { StickToBottom } from "use-stick-to-bottom";
 import dynamic from "next/dynamic";
 
+import { SandpackCodeEditor, SandpackFileExplorer, SandpackPreview, SandpackLayout } from "@codesandbox/sandpack-react";
+import SandpackContainer from "@/components/sandpack-container";
+
 const ExportToGitHub = dynamic(() => import("@/components/export-to-github"), {
   ssr: false,
 });
-
-const CodeRunner = dynamic(() => import("@/components/code-runner"), {
-  ssr: false,
-  loading: () => <div className="flex items-center justify-center p-4">Loading code runner...</div>
-});
-const SyntaxHighlighter = dynamic(
-  () => import("@/components/syntax-highlighter"),
-  {
-    ssr: false,
-    loading: () => <div className="flex items-center justify-center p-4">Loading syntax highlighter...</div>
-  },
-);
 
 export default function CodeViewer({
   chat,
@@ -59,7 +50,7 @@ export default function CodeViewer({
   const code = streamApp ? streamApp.content : app?.code || "";
   const language = streamApp ? streamApp.language : app?.language || "";
   const title = streamApp ? streamApp.filename.name : app?.filename?.name || "";
-  const layout = ["python", "ts", "js", "javascript", "typescript"].includes(
+  const layoutType = ["python", "ts", "js", "javascript", "typescript"].includes(
     language,
   )
     ? "two-up"
@@ -95,7 +86,7 @@ export default function CodeViewer({
             {title} v{currentVersion + 1}
           </span>
         </div>
-        {layout === "tabbed" && (
+        {layoutType === "tabbed" && (
           <div className="rounded-lg border-2 border-gray-300 p-1">
             <button
               onClick={() => onTabChange("code")}
@@ -115,55 +106,68 @@ export default function CodeViewer({
         )}
       </div>
 
-      {layout === "tabbed" ? (
-        <div className="flex grow flex-col overflow-y-auto bg-white">
-          {activeTab === "code" ? (
-            <StickToBottom
-              className="relative grow overflow-hidden"
-              resize="smooth"
-              initial={streamAppIsGenerating ? "smooth" : false}
-            >
-              <StickToBottom.Content>
-                <SyntaxHighlighter code={code} language={language} />
-              </StickToBottom.Content>
-            </StickToBottom>
-          ) : (
-            <>
-              {language && (
-                <div className="flex h-full items-center justify-center">
-                  <CodeRunner
-                    onRequestFix={onRequestFix}
-                    language={language}
-                    code={code}
-                    template={chat.template}
-                    key={refresh}
-                  />
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      ) : (
-        <div className="flex grow flex-col bg-white">
-          <div className="h-1/2 overflow-y-auto">
-            <SyntaxHighlighter code={code} language={language} />
-          </div>
-          <div className="flex h-1/2 flex-col">
-            <div className="border-t border-gray-300 px-4 py-4">Output</div>
-            <div className="flex grow items-center justify-center border-t">
-              {!streamAppIsGenerating && (
-                <CodeRunner
-                  onRequestFix={onRequestFix}
-                  language={language}
-                  code={code}
-                  template={chat.template}
-                  key={refresh}
+      <SandpackContainer
+        code={code}
+        initialTemplate={chat.template}
+        onRequestFix={onRequestFix}
+        key={refresh}
+      >
+        {layoutType === "tabbed" ? (
+          <div className="flex grow flex-col overflow-y-auto bg-white">
+            {activeTab === "code" ? (
+              <SandpackLayout>
+                <SandpackFileExplorer />
+                <SandpackCodeEditor
+                  showTabs
+                  showLineNumbers={false}
+                  showInlineErrors
+                  wrapContent
+                  closableTabs
                 />
-              )}
+              </SandpackLayout>
+            ) : (
+              <div className="flex h-full items-center justify-center">
+                <SandpackPreview
+                  showNavigator={false}
+                  showOpenInCodeSandbox={false}
+                  showRefreshButton={false}
+                  showRestartButton={false}
+                  showOpenNewtab={false}
+                  className="h-full w-full"
+                />
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex grow flex-col bg-white">
+            <div className="h-1/2 overflow-y-auto">
+              <SandpackLayout>
+                <SandpackFileExplorer />
+                <SandpackCodeEditor
+                  showTabs
+                  showLineNumbers={false}
+                  showInlineErrors
+                  wrapContent
+                  closableTabs
+                />
+              </SandpackLayout>
+            </div>
+            <div className="flex h-1/2 flex-col">
+              <div className="border-t border-gray-300 px-4 py-4">Output</div>
+              <div className="flex grow items-center justify-center border-t">
+                <SandpackPreview
+                  showNavigator={false}
+                  showOpenInCodeSandbox={false}
+                  showRefreshButton={false}
+                  showRestartButton={false}
+                  showOpenNewtab={false}
+                  className="h-full w-full"
+                />
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </SandpackContainer>
 
       <div className="flex items-center justify-between border-t border-gray-300 px-4 py-4">
         <div className="inline-flex items-center gap-2.5 text-sm">

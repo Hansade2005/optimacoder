@@ -1,12 +1,19 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaNeon } from "@prisma/adapter-neon";
+import { Pool } from "@neondatabase/serverless"; // ✅ Add this import
 import { z } from "zod";
 import Together from "together-ai";
 
 export async function POST(req: Request) {
-  const adapter = PrismaNeon({
+  // ✅ Use Pool instance instead of plain object
+  const pool = new Pool({
     connectionString: process.env.DATABASE_URL!,
   });
+
+  // ✅ Instantiate PrismaNeon with `new` and pass the Pool
+  const adapter = new PrismaNeon(pool);
+
+  // ✅ Use adapter in PrismaClient
   const prisma = new PrismaClient({ adapter });
 
   const { messageId, model } = await req.json();

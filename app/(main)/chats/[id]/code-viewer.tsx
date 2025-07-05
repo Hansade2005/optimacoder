@@ -5,7 +5,7 @@ import ChevronRightIcon from "@/components/icons/chevron-right";
 import CloseIcon from "@/components/icons/close-icon";
 import RefreshIcon from "@/components/icons/refresh";
 import { extractFirstCodeBlock, splitByFirstCodeFence } from "@/lib/utils";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import type { Chat, Message } from "./page";
 import { Share } from "./share";
 import { StickToBottom } from "use-stick-to-bottom";
@@ -139,7 +139,7 @@ export default function CodeViewer({
   const [refresh, setRefresh] = useState(0);
   const [showExportModal, setShowExportModal] = useState(false);
 
-  useEffect(() => {
+  const updateFiles = useCallback(() => {
     const content = message?.content || streamText;
     if (content) {
       const parsedFiles = parseFilesFromContent(content);
@@ -153,7 +153,11 @@ export default function CodeViewer({
         setActiveFile(firstFile);
       }
     }
-  }, [message?.content, streamText]);
+  }, [message?.content, streamText, files, activeFile]);
+
+  useEffect(() => {
+    updateFiles();
+  }, [updateFiles]);
 
   const app = message ? extractFirstCodeBlock(message.content) : undefined;
   const streamAppParts = splitByFirstCodeFence(streamText);

@@ -70,3 +70,5 @@ export const TEMPLATES = [
   { value: "solid", label: "Solid" },
   { value: "vanilla", label: "Vanilla JS" },
 ];
+
+export type SandpackTemplate = (typeof TEMPLATES)[number]["value"];

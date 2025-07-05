@@ -12,6 +12,7 @@ import {
 import dedent from "dedent";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { useState, useEffect } from "react";
+import { SandpackTemplate } from "@/lib/constants"; // Import SandpackTemplate
 
 export default function ReactCodeRunner({
   code,
@@ -19,11 +20,10 @@ export default function ReactCodeRunner({
   onRequestFix,
 }: {
   code: string;
-  template?: string;
+  template?: SandpackTemplate; // Use SandpackTemplate type
   onRequestFix?: (e: string) => void;
 }) {
-  type SandpackTemplate = "react-ts" | "react" | "vue" | "angular" | "svelte" | "solid" | "vanilla";
-  const [template, setTemplate] = useState<SandpackTemplate>((initialTemplate as SandpackTemplate) || "react-ts");
+  const [template, setTemplate] = useState<SandpackTemplate>(initialTemplate || "react-ts");
   // Track files and tab state
   const [files, setFiles] = useState<{ [key: string]: any }>({
     "/App.tsx": code,
@@ -48,7 +48,7 @@ export default function ReactCodeRunner({
     if (code && code !== files["/App.tsx"]) {
       openFile("/App.tsx", code);
     }
-  }, [code]);
+  }, [code, files]); // Added 'files' to dependency array as per ESLint warning
 
   return (
     <SandpackProvider
@@ -220,5 +220,3 @@ const dependencies = {
   "framer-motion": "^11.15.0",
   vaul: "^0.9.1",
 };
-
-

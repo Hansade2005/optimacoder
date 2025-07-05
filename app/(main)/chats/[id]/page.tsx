@@ -2,6 +2,7 @@ import { getPrisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import { cache } from "react";
 import PageClient from "./page.client";
+import { SandpackTemplate } from "@/lib/constants"; // Import SandpackTemplate
 
 export default async function Page({
   params,
@@ -24,7 +25,9 @@ const getChatById = cache(async (id: string) => {
   });
 });
 
-export type Chat = NonNullable<Awaited<ReturnType<typeof getChatById>>>;
+export type Chat = NonNullable<Awaited<ReturnType<typeof getChatById>>> & {
+  template: SandpackTemplate; // Ensure template is of SandpackTemplate type
+};
 export type Message = Chat["messages"][number];
 
 // Removed edge runtime to reduce bundle size

@@ -3,9 +3,6 @@
 import TemplateSelector from "./template-selector";
 import {
   SandpackProvider,
-  SandpackLayout,
-  SandpackFileExplorer,
-  SandpackCodeEditor,
   SandpackPreview,
   useSandpack,
 } from "@codesandbox/sandpack-react";
@@ -22,31 +19,26 @@ export default function ReactCodeRunner({
   template?: string;
   onRequestFix?: (e: string) => void;
 }) {
-  type SandpackTemplate = "react-ts" | "react" | "vue" | "angular" | "svelte" | "solid" | "vanilla";
-  const [template, setTemplate] = useState<SandpackTemplate>((initialTemplate as SandpackTemplate) || "react-ts");
-  // Track files and tab state
+  type SandpackTemplate =
+    | "react-ts"
+    | "react"
+    | "vue"
+    | "angular"
+    | "svelte"
+    | "solid"
+    | "vanilla";
+
+  const [template, setTemplate] = useState<SandpackTemplate>(
+    (initialTemplate as SandpackTemplate) || "react-ts"
+  );
+
   const [files, setFiles] = useState<{ [key: string]: any }>({
     "/App.tsx": code,
   });
-  const [visibleFiles, setVisibleFiles] = useState<string[]>(["/App.tsx"]);
-  const [activeFile, setActiveFile] = useState<string>("/App.tsx");
 
-  // Helper to add/update files and manage tabs (max 3 open)
-  const openFile = (filePath: string, fileCode: string) => {
-    setFiles((prev) => ({ ...prev, [filePath]: fileCode }));
-    setVisibleFiles((prev) => {
-      let next = prev.filter((f) => f !== filePath);
-      next.push(filePath);
-      if (next.length > 3) next = next.slice(next.length - 3);
-      return next;
-    });
-    setActiveFile(filePath);
-  };
-
-  // Example: update files when code prop changes (AI streaming)
   useEffect(() => {
     if (code && code !== files["/App.tsx"]) {
-      openFile("/App.tsx", code);
+      setFiles({ "/App.tsx": code });
     }
   }, [code]);
 
@@ -56,8 +48,8 @@ export default function ReactCodeRunner({
       template={template}
       files={files}
       options={{
-        visibleFiles,
-        activeFile,
+        visibleFiles: ["/App.tsx"],
+        activeFile: "/App.tsx",
         externalResources: [
           "https://unpkg.com/@tailwindcss/ui/dist/tailwind-ui.min.css",
         ],
@@ -72,24 +64,16 @@ export default function ReactCodeRunner({
           onChange={(newTemplate: SandpackTemplate) => setTemplate(newTemplate)}
         />
       </div>
-      <SandpackLayout>
-        <SandpackFileExplorer />
-        <SandpackCodeEditor
-          showTabs
-          showLineNumbers={false}
-          showInlineErrors
-          wrapContent
-          closableTabs
-        />
-        <SandpackPreview
-          showNavigator={false}
-          showOpenInCodeSandbox={false}
-          showRefreshButton={false}
-          showRestartButton={false}
-          showOpenNewtab={false}
-          className="h-full w-full"
-        />
-      </SandpackLayout>
+
+      <SandpackPreview
+        showNavigator={false}
+        showOpenInCodeSandbox={false}
+        showRefreshButton={false}
+        showRestartButton={false}
+        showOpenNewtab={false}
+        className="h-full w-full"
+      />
+
       {onRequestFix && <ErrorMessage onRequestFix={onRequestFix} />}
     </SandpackProvider>
   );
@@ -114,11 +98,8 @@ function ErrorMessage({ onRequestFix }: { onRequestFix: (e: string) => void }) {
           <button
             onClick={async () => {
               if (!sandpack.error) return;
-
               setDidCopy(true);
-              await window.navigator.clipboard.writeText(
-                sandpack.error.message,
-              );
+              await window.navigator.clipboard.writeText(sandpack.error.message);
               await new Promise((resolve) => setTimeout(resolve, 2000));
               setDidCopy(false);
             }}
@@ -220,5 +201,3 @@ const dependencies = {
   "framer-motion": "^11.15.0",
   vaul: "^0.9.1",
 };
-
-

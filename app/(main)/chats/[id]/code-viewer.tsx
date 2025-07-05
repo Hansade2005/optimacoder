@@ -5,7 +5,7 @@ import ChevronRightIcon from "@/components/icons/chevron-right";
 import CloseIcon from "@/components/icons/close-icon";
 import RefreshIcon from "@/components/icons/refresh";
 import { extractFirstCodeBlock, splitByFirstCodeFence } from "@/lib/utils";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { Chat, Message } from "./page";
 import { Share } from "./share";
 import { StickToBottom } from "use-stick-to-bottom";
@@ -39,6 +39,28 @@ const SyntaxHighlighter = dynamic(() => import("@/components/syntax-highlighter"
   ),
 });
 
+// Helper function to parse multiple files from AI response
+function parseFilesFromContent(content: string) {
+  const files: Record<string, string> = {};
+  const fileRegex = /```(?:tsx|ts|jsx|js|typescript|javascript|html|css|json|md)\{filename=([^\}]+)\}([\s\S]*?)```/g;
+  
+  let match;
+  while ((match = fileRegex.exec(content)) !== null) {
+    const [, filename, fileContent] = match;
+    files[filename] = fileContent.trim();
+  }
+  
+  // If no files found with filename, use the first code block as App.tsx
+  if (Object.keys(files).length === 0) {
+    const appCode = extractFirstCodeBlock(content);
+    if (appCode?.code) {
+      files['/App.tsx'] = appCode.code;
+    }
+  }
+  
+  return files;
+}
+
 export default function CodeViewer({
   chat,
   streamText,
@@ -58,6 +80,23 @@ export default function CodeViewer({
   onClose: () => void;
   onRequestFix: (e: string) => void;
 }) {
+  const [files, setFiles] = useState<Record<string, string>>({});
+  const [activeFile, setActiveFile] = useState('/App.tsx');
+
+  useEffect(() => {
+    const content = message?.content || streamText;
+    if (content) {
+      const parsedFiles = parseFilesFromContent(content);
+      setFiles(prev => ({ ...prev, ...parsedFiles }));
+      
+      // Set active file to the first file if not set
+      if (!activeFile || !parsedFiles[activeFile]) {
+        const firstFile = Object.keys(parsedFiles)[0] || '/App.tsx';
+        setActiveFile(firstFile);
+      }
+    }
+  }, [message?.content, streamText]);
+
   const app = message ? extractFirstCodeBlock(message.content) : undefined;
   const streamAppParts = splitByFirstCodeFence(streamText);
   const streamApp = streamAppParts.find(
@@ -143,16 +182,20 @@ export default function CodeViewer({
                   : "react"
               }
               files={{
-                "/App.tsx": code || "// no code available",
+                ...files,
+                // Ensure App.tsx exists even if empty
+                '/App.tsx': files['/App.tsx'] || '// No code available'
               }}
               options={{
-                visibleFiles: ["/App.tsx"],
-                activeFile: "/App.tsx",
-                // removed editorHeight here as it is not a valid option
+                visibleFiles: Object.keys(files),
+                activeFile: activeFile,
               }}
             >
               <SandpackLayout className="flex-grow border border-gray-300 rounded-md">
-                <SandpackFileExplorer />
+                <SandpackFileExplorer 
+                  autoHiddenFiles={false}
+                  onDoubleClickFile={(file) => setActiveFile(file)}
+                />
                 <SandpackCodeEditor
                   showTabs
                   showLineNumbers

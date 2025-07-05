@@ -46,7 +46,6 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@types/clsx": "^0.0.33",
     "eslint": "^8",
     "eslint-config-next": "15.1.4",
     "postcss": "^8",

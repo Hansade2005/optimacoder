@@ -20,7 +20,9 @@ import Header from "@/components/header";
 import { useS3Upload } from "next-s3-upload";
 import UploadIcon from "@/components/icons/upload-icon";
 import { XCircleIcon } from "@heroicons/react/20/solid";
-import { MODELS, SUGGESTED_PROMPTS } from "@/lib/constants";
+import { MODELS, SUGGESTED_PROMPTS, TEMPLATES } from "@/lib/constants";
+import TemplateSelector from "@/components/template-selector";
+
 
 export default function Home() {
   const { setStreamPromise } = use(Context);
@@ -29,9 +31,8 @@ export default function Home() {
   const [prompt, setPrompt] = useState("");
   const [model, setModel] = useState(MODELS[0].value);
   const [quality, setQuality] = useState("high");
-  const [screenshotUrl, setScreenshotUrl] = useState<string | undefined>(
-    undefined,
-  );
+  const [template, setTemplate] = useState(TEMPLATES[0].value); // default React TS
+  const [screenshotUrl, setScreenshotUrl] = useState<string | undefined>(undefined);
   const [screenshotLoading, setScreenshotLoading] = useState(false);
   const selectedModel = MODELS.find((m) => m.value === model);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -90,18 +91,21 @@ export default function Home() {
           <form
             className="relative w-full max-w-2xl pt-6 lg:pt-12"
             action={async (formData) => {
+
               startTransition(async () => {
-                const { prompt, model, quality } = Object.fromEntries(formData);
+                const { prompt, model, quality, template } = Object.fromEntries(formData);
 
                 assert.ok(typeof prompt === "string");
                 assert.ok(typeof model === "string");
                 assert.ok(quality === "high" || quality === "low");
+                // assert.ok(typeof template === "string");
 
                 const { chatId, lastMessageId } = await createChat(
                   prompt,
                   model,
                   quality,
                   screenshotUrl,
+                  template as string
                 );
 
                 const streamPromise = fetch(
@@ -163,28 +167,32 @@ export default function Home() {
                     </div>
                   )}
                   <div className="relative">
-                    <div className="p-3">
+                    <div className="p-3 flex flex-col gap-2">
                       <p className="invisible w-full whitespace-pre-wrap">
                         {textareaResizePrompt}
                       </p>
+                      <div className="flex items-center gap-2">
+                        <textarea
+                          placeholder="Build me a budgeting app..."
+                          required
+                          name="prompt"
+                          rows={1}
+                          className="peer w-full resize-none bg-transparent p-3 placeholder-gray-500 focus-visible:outline-none disabled:opacity-50"
+                          value={prompt}
+                          onChange={(e) => setPrompt(e.target.value)}
+                          onKeyDown={(event) => {
+                            if (event.key === "Enter" && !event.shiftKey) {
+                              event.preventDefault();
+                              const target = event.target;
+                              if (!(target instanceof HTMLTextAreaElement)) return;
+                              target.closest("form")?.requestSubmit();
+                            }
+                          }}
+                        />
+                        <TemplateSelector value={template} onChange={setTemplate} />
+                        <input type="hidden" name="template" value={template} />
+                      </div>
                     </div>
-                    <textarea
-                      placeholder="Build me a budgeting app..."
-                      required
-                      name="prompt"
-                      rows={1}
-                      className="peer absolute inset-0 w-full resize-none bg-transparent p-3 placeholder-gray-500 focus-visible:outline-none disabled:opacity-50"
-                      value={prompt}
-                      onChange={(e) => setPrompt(e.target.value)}
-                      onKeyDown={(event) => {
-                        if (event.key === "Enter" && !event.shiftKey) {
-                          event.preventDefault();
-                          const target = event.target;
-                          if (!(target instanceof HTMLTextAreaElement)) return;
-                          target.closest("form")?.requestSubmit();
-                        }
-                      }}
-                    />
                   </div>
                 </div>
                 <div className="absolute bottom-2 left-2 right-2.5 flex items-center justify-between">

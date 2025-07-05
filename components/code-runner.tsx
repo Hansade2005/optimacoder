@@ -8,13 +8,15 @@ import LazyCodeRunner from "./code-runner-lazy";
 export default function CodeRunner({
   language,
   code,
+  template,
   onRequestFix,
 }: {
   language: string;
   code: string;
+  template?: string;
   onRequestFix?: (e: string) => void;
 }) {
-  return <LazyCodeRunner language={language} code={code} onRequestFix={onRequestFix} />;
+  return <LazyCodeRunner language={language} code={code} template={template} onRequestFix={onRequestFix} />;
 
   // return (
   //   <>

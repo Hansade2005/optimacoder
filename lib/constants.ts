@@ -7,7 +7,6 @@ export const MODELS = [
     label: "Qwen 2.5 Coder 32B",
     value: "Qwen/Qwen2.5-Coder-32B-Instruct",
   },
-
   {
     label: "Llama 4 Maverick",
     value: "meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8",
@@ -43,11 +42,11 @@ export const SUGGESTED_PROMPTS = [
     description:
       "Make me a blog app that has a few blogs there for people to read. Users can click into the blogs and read them, then go back to the homepage to see more.",
   },
-  // {
-  //   title: "Recipe site",
-  //   description:
-  //     "Make me a site that has easy to make recipes in a grid that you can click into and see the full recipe. Also make it possible for me to add my own",
-  // },
+  {
+    title: "Recipe site",
+    description:
+      "Make me a site that has easy to make recipes in a grid that you can click into and see the full recipe. Also make it possible for me to add my own",
+  },
   {
     title: "Flashcard app",
     description:
@@ -58,4 +57,16 @@ export const SUGGESTED_PROMPTS = [
     description:
       "Make me a time zone dashboard that shows me the time zone in the top 6 most popular time zones and gives me a dropdown to add others",
   },
+];
+
+// Templates for project scaffolding
+export const TEMPLATES = [
+  { value: "react-ts", label: "React + TypeScript" },
+  { value: "react", label: "React" },
+  { value: "nextjs", label: "Next.js" },
+  { value: "vue", label: "Vue" },
+  { value: "angular", label: "Angular" },
+  { value: "svelte", label: "Svelte" },
+  { value: "solid", label: "Solid" },
+  { value: "vanilla", label: "Vanilla JS" },
 ];

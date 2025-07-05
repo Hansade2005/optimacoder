@@ -135,6 +135,7 @@ export default function CodeViewer({
                     onRequestFix={onRequestFix}
                     language={language}
                     code={code}
+                    template={chat.template}
                     key={refresh}
                   />
                 </div>
@@ -155,6 +156,7 @@ export default function CodeViewer({
                   onRequestFix={onRequestFix}
                   language={language}
                   code={code}
+                  template={chat.template}
                   key={refresh}
                 />
               )}

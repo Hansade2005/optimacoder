@@ -24,6 +24,7 @@ model Chat {
   quality           String
   prompt            String
   title             String
+  template          String    @default("react-ts")
   llamaCoderVersion String    @default("v2")
   shadcn            Boolean
   messages          Message[]

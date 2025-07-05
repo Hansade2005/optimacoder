@@ -14,6 +14,7 @@ export async function createChat(
   model: string,
   quality: "high" | "low",
   screenshotUrl: string | undefined,
+  template: string,
 ) {
   const prisma = getPrisma();
   const chat = await prisma.chat.create({
@@ -22,6 +23,7 @@ export async function createChat(
       quality,
       prompt,
       title: "",
+      template,
       shadcn: true,
     },
   });
@@ -150,6 +152,7 @@ export async function createChat(
     },
     data: {
       title,
+      template,
       messages: {
         createMany: {
           data: [

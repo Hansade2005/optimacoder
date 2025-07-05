@@ -1,63 +1,63 @@
 "use client";
 
+import TemplateSelector from "./template-selector";
 import {
-  SandpackPreview,
   SandpackProvider,
+  SandpackLayout,
+  SandpackFileExplorer,
+  SandpackCodeEditor,
+  SandpackPreview,
   useSandpack,
-} from "@codesandbox/sandpack-react/unstyled";
+} from "@codesandbox/sandpack-react";
 import dedent from "dedent";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export default function ReactCodeRunner({
   code,
+  template: initialTemplate,
   onRequestFix,
 }: {
   code: string;
+  template?: string;
   onRequestFix?: (e: string) => void;
 }) {
-  const [shadcnComponents, setShadcnComponents] = useState<any>(null);
+  type SandpackTemplate = "react-ts" | "react" | "vue" | "angular" | "svelte" | "solid" | "vanilla";
+  const [template, setTemplate] = useState<SandpackTemplate>((initialTemplate as SandpackTemplate) || "react-ts");
+  // Track files and tab state
+  const [files, setFiles] = useState<{ [key: string]: any }>({
+    "/App.tsx": code,
+  });
+  const [visibleFiles, setVisibleFiles] = useState<string[]>(["/App.tsx"]);
+  const [activeFile, setActiveFile] = useState<string>("/App.tsx");
 
+  // Helper to add/update files and manage tabs (max 3 open)
+  const openFile = (filePath: string, fileCode: string) => {
+    setFiles((prev) => ({ ...prev, [filePath]: fileCode }));
+    setVisibleFiles((prev) => {
+      let next = prev.filter((f) => f !== filePath);
+      next.push(filePath);
+      if (next.length > 3) next = next.slice(next.length - 3);
+      return next;
+    });
+    setActiveFile(filePath);
+  };
+
+  // Example: update files when code prop changes (AI streaming)
   useEffect(() => {
-    // Dynamically import essential shadcn components to avoid bundling with Edge Function
-    // This ensures the components are only loaded when the CodeRunner is actually used
-    import("@/lib/shadcn-essential").then((module) => 
-      setShadcnComponents(module.essentialShadcnComponents)
-    ).catch(console.error);
-  }, []);
-
-  if (!shadcnComponents) {
-    return <div>Loading...</div>;
-  }
+    if (code && code !== files["/App.tsx"]) {
+      openFile("/App.tsx", code);
+    }
+  }, [code]);
 
   return (
     <SandpackProvider
-      key={code}
-      template="react-ts"
-      className="relative h-full w-full [&_.sp-preview-container]:flex [&_.sp-preview-container]:h-full [&_.sp-preview-container]:w-full [&_.sp-preview-container]:grow [&_.sp-preview-container]:flex-col [&_.sp-preview-container]:justify-center [&_.sp-preview-iframe]:grow"
-      files={{
-        "App.tsx": code,
-        ...getShadcnFiles(shadcnComponents),
-        "/tsconfig.json": {
-          code: `{
-            "include": [
-              "./**/*"
-            ],
-            "compilerOptions": {
-              "strict": true,
-              "esModuleInterop": true,
-              "lib": [ "dom", "es2015" ],
-              "jsx": "react-jsx",
-              "baseUrl": "./",
-              "paths": {
-                "@/components/*": ["components/*"]
-              }
-            }
-          }
-        `,
-        },
-      }}
+      key={template}
+      template={template}
+      files={files}
       options={{
+        visibleFiles,
+        activeFile,
         externalResources: [
           "https://unpkg.com/@tailwindcss/ui/dist/tailwind-ui.min.css",
         ],
@@ -66,14 +66,30 @@ export default function ReactCodeRunner({
         dependencies,
       }}
     >
-      <SandpackPreview
-        showNavigator={false}
-        showOpenInCodeSandbox={false}
-        showRefreshButton={false}
-        showRestartButton={false}
-        showOpenNewtab={false}
-        className="h-full w-full"
-      />
+      <div className="absolute top-2 right-2 z-10">
+        <TemplateSelector
+          value={template}
+          onChange={(newTemplate: SandpackTemplate) => setTemplate(newTemplate)}
+        />
+      </div>
+      <SandpackLayout>
+        <SandpackFileExplorer />
+        <SandpackCodeEditor
+          showTabs
+          showLineNumbers={false}
+          showInlineErrors
+          wrapContent
+          closableTabs
+        />
+        <SandpackPreview
+          showNavigator={false}
+          showOpenInCodeSandbox={false}
+          showRefreshButton={false}
+          showRestartButton={false}
+          showOpenNewtab={false}
+          className="h-full w-full"
+        />
+      </SandpackLayout>
       {onRequestFix && <ErrorMessage onRequestFix={onRequestFix} />}
     </SandpackProvider>
   );
@@ -204,3 +220,5 @@ const dependencies = {
   "framer-motion": "^11.15.0",
   vaul: "^0.9.1",
 };
+
+

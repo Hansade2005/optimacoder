@@ -1,3 +1,8 @@
+"use client";
+
+import { SandpackProvider, SandpackPreview } from "@codesandbox/sandpack-react";
+import LazyCodeRunner from "./code-runner-lazy";
+
 interface CodeRunnerProps {
   language: string;
   code: string;

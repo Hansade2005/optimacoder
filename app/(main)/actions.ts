@@ -8,14 +8,14 @@ import {
 } from "@/lib/prompts";
 import { notFound } from "next/navigation";
 import Together from "together-ai";
-import { SandpackTemplate } from "@/lib/constants"; // Import SandpackTemplate
+import { SandpackPredefinedTemplate } from "@codesandbox/sandpack-react"; // Import SandpackPredefinedTemplate
 
 export async function createChat(
   prompt: string,
   model: string,
   quality: "high" | "low",
   screenshotUrl: string | undefined,
-  template: SandpackTemplate, // Use SandpackTemplate type
+  template: SandpackPredefinedTemplate, // Use SandpackPredefinedTemplate type
 ) {
   const prisma = getPrisma();
   const chat = await prisma.chat.create({

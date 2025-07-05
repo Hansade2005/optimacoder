@@ -20,8 +20,9 @@ import Header from "@/components/header";
 import { useS3Upload } from "next-s3-upload";
 import UploadIcon from "@/components/icons/upload-icon";
 import { XCircleIcon } from "@heroicons/react/20/solid";
-import { MODELS, SUGGESTED_PROMPTS, TEMPLATES, SandpackTemplate } from "@/lib/constants"; // Import SandpackTemplate
+import { MODELS, SUGGESTED_PROMPTS, TEMPLATES } from "@/lib/constants";
 import TemplateSelector from "@/components/template-selector";
+import { SandpackPredefinedTemplate } from "@codesandbox/sandpack-react"; // Import SandpackPredefinedTemplate
 
 
 export default function Home() {
@@ -31,7 +32,7 @@ export default function Home() {
   const [prompt, setPrompt] = useState("");
   const [model, setModel] = useState(MODELS[0].value);
   const [quality, setQuality] = useState("high");
-  const [template, setTemplate] = useState<SandpackTemplate>(TEMPLATES[0].value); // default React TS, typed as SandpackTemplate
+  const [template, setTemplate] = useState<SandpackPredefinedTemplate>(TEMPLATES[0].value as SandpackPredefinedTemplate); // default React TS, typed as SandpackPredefinedTemplate
   const [screenshotUrl, setScreenshotUrl] = useState<string | undefined>(undefined);
   const [screenshotLoading, setScreenshotLoading] = useState(false);
   const selectedModel = MODELS.find((m) => m.value === model);
@@ -105,7 +106,7 @@ export default function Home() {
                   model,
                   quality,
                   screenshotUrl,
-                  template as SandpackTemplate // Cast to SandpackTemplate
+                  template as SandpackPredefinedTemplate // Cast to SandpackPredefinedTemplate
                 );
 
                 const streamPromise = fetch(

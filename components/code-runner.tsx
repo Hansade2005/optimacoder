@@ -2,12 +2,12 @@
 
 import { SandpackProvider, SandpackPreview } from "@codesandbox/sandpack-react";
 import LazyCodeRunner from "./code-runner-lazy";
-import { SandpackTemplate } from "@/lib/constants"; // Import SandpackTemplate
+import { SandpackPredefinedTemplate } from "@codesandbox/sandpack-react"; // Import SandpackPredefinedTemplate
 
 interface CodeRunnerProps {
   language: string;
   code: string;
-  template?: SandpackTemplate; // Use SandpackTemplate type
+  template?: SandpackPredefinedTemplate; // Use SandpackPredefinedTemplate type
   onRequestFix?: (e: string) => void;
   showEditor?: boolean;
 }

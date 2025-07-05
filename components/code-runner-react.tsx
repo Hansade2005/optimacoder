@@ -8,11 +8,11 @@ import {
   SandpackCodeEditor,
   SandpackPreview,
   useSandpack,
+  SandpackPredefinedTemplate, // Import SandpackPredefinedTemplate
 } from "@codesandbox/sandpack-react";
 import dedent from "dedent";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { useState, useEffect } from "react";
-import { SandpackTemplate } from "@/lib/constants"; // Import SandpackTemplate
 
 export default function ReactCodeRunner({
   code,
@@ -20,10 +20,10 @@ export default function ReactCodeRunner({
   onRequestFix,
 }: {
   code: string;
-  template?: SandpackTemplate; // Use SandpackTemplate type
+  template?: SandpackPredefinedTemplate; // Use SandpackPredefinedTemplate type
   onRequestFix?: (e: string) => void;
 }) {
-  const [template, setTemplate] = useState<SandpackTemplate>(initialTemplate || "react-ts");
+  const [template, setTemplate] = useState<SandpackPredefinedTemplate>(initialTemplate || "react-ts");
   // Track files and tab state
   const [files, setFiles] = useState<{ [key: string]: any }>({
     "/App.tsx": code,
@@ -69,7 +69,7 @@ export default function ReactCodeRunner({
       <div className="absolute top-2 right-2 z-10">
         <TemplateSelector
           value={template}
-          onChange={(newTemplate: SandpackTemplate) => setTemplate(newTemplate)}
+          onChange={(newTemplate: SandpackPredefinedTemplate) => setTemplate(newTemplate)}
         />
       </div>
       <SandpackLayout>

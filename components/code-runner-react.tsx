@@ -8,19 +8,14 @@ import {
 import dedent from "dedent";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { useState, useEffect } from "react";
-import { MultiFileProject, parseCodeBlocksToProject, convertSingleFileToProject, SandpackTemplate } from "@/lib/utils";
-
-export interface ReactCodeRunnerProps {
-  code?: string;
-  project?: MultiFileProject;
-  onRequestFix?: (e: string) => void;
-}
 
 export default function ReactCodeRunner({
   code,
-  project,
   onRequestFix,
-}: ReactCodeRunnerProps) {
+}: {
+  code: string;
+  onRequestFix?: (e: string) => void;
+}) {
   const [shadcnComponents, setShadcnComponents] = useState<any>(null);
 
   useEffect(() => {
@@ -35,51 +30,16 @@ export default function ReactCodeRunner({
     return <div>Loading...</div>;
   }
 
-  // Determine if we're working with a multifile project or single file
-  let finalProject: MultiFileProject;
-  let template: SandpackTemplate = 'react-ts';
-
-  if (project) {
-    finalProject = project;
-    template = project.template;
-  } else if (code) {
-    // Check if the code contains multiple files or is a single file
-    const parsedProject = parseCodeBlocksToProject(code);
-    if (parsedProject.files.length > 1) {
-      finalProject = parsedProject;
-      template = parsedProject.template;
-    } else {
-      finalProject = convertSingleFileToProject(code);
-    }
-  } else {
-    // Fallback
-    finalProject = convertSingleFileToProject('export default function App() { return <div>Hello World</div>; }');
-  }
-
-  // Convert project files to Sandpack format
-  const sandpackFiles: Record<string, string> = {};
-  
-  finalProject.files.forEach(file => {
-    sandpackFiles[file.path] = file.content;
-  });
-
-  // Add shadcn components unless it's a non-React template
-  const shouldIncludeShadcn = template.includes('react') || template === 'react-ts' || template === 'react';
-  if (shouldIncludeShadcn) {
-    Object.assign(sandpackFiles, getShadcnFiles(shadcnComponents));
-  }
-
   return (
     <SandpackProvider
-      key={JSON.stringify(finalProject)}
-      template={template}
+      key={code}
+      template="react-ts"
       className="relative h-full w-full [&_.sp-preview-container]:flex [&_.sp-preview-container]:h-full [&_.sp-preview-container]:w-full [&_.sp-preview-container]:grow [&_.sp-preview-container]:flex-col [&_.sp-preview-container]:justify-center [&_.sp-preview-iframe]:grow"
       files={{
-        ...sandpackFiles,
-        // Only add TypeScript config for TypeScript templates
-        ...(template.includes('ts') && {
-          "/tsconfig.json": {
-            code: `{
+        "App.tsx": code,
+        ...getShadcnFiles(shadcnComponents),
+        "/tsconfig.json": {
+          code: `{
             "include": [
               "./**/*"
             ],
@@ -95,8 +55,7 @@ export default function ReactCodeRunner({
             }
           }
         `,
-          }
-        })
+        },
       }}
       options={{
         externalResources: [
@@ -104,10 +63,7 @@ export default function ReactCodeRunner({
         ],
       }}
       customSetup={{
-        dependencies: {
-          ...dependencies,
-          ...(finalProject.dependencies || {})
-        },
+        dependencies,
       }}
     >
       <SandpackPreview

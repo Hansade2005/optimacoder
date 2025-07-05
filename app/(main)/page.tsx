@@ -8,7 +8,6 @@ import LoadingButton from "@/components/loading-button";
 import Spinner from "@/components/spinner";
 import bgImg from "@/public/halo.png";
 import * as Select from "@radix-ui/react-select";
-import * as Switch from "@radix-ui/react-switch";
 import assert from "assert";
 import { CheckIcon, ChevronDownIcon } from "lucide-react";
 import Image from "next/image";
@@ -22,7 +21,6 @@ import { useS3Upload } from "next-s3-upload";
 import UploadIcon from "@/components/icons/upload-icon";
 import { XCircleIcon } from "@heroicons/react/20/solid";
 import { MODELS, SUGGESTED_PROMPTS } from "@/lib/constants";
-import { SandpackTemplate } from "@/lib/utils";
 
 export default function Home() {
   const { setStreamPromise } = use(Context);
@@ -35,8 +33,6 @@ export default function Home() {
     undefined,
   );
   const [screenshotLoading, setScreenshotLoading] = useState(false);
-  const [isMultiFile, setIsMultiFile] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<SandpackTemplate>('react-ts');
   const selectedModel = MODELS.find((m) => m.value === model);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -106,8 +102,6 @@ export default function Home() {
                   model,
                   quality,
                   screenshotUrl,
-                  isMultiFile,
-                  selectedTemplate,
                 );
 
                 const streamPromise = fetch(
@@ -283,68 +277,6 @@ export default function Home() {
                         </Select.Content>
                       </Select.Portal>
                     </Select.Root>
-                    <div className="h-4 w-px bg-gray-200 max-sm:hidden" />
-                    
-                    {/* Multifile toggle */}
-                    <div className="flex items-center gap-2">
-                      <Switch.Root
-                        checked={isMultiFile}
-                        onCheckedChange={setIsMultiFile}
-                        className="w-11 h-6 bg-gray-200 rounded-full relative data-[state=checked]:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-                      >
-                        <Switch.Thumb className="block w-5 h-5 bg-white rounded-full transition-transform duration-100 translate-x-0.5 will-change-transform data-[state=checked]:translate-x-5" />
-                      </Switch.Root>
-                      <span className="text-sm text-gray-400 max-sm:hidden">Multifile</span>
-                    </div>
-                    
-                    {isMultiFile && (
-                      <>
-                        <div className="h-4 w-px bg-gray-200 max-sm:hidden" />
-                        <Select.Root
-                          name="template"
-                          value={selectedTemplate}
-                          onValueChange={(value) => setSelectedTemplate(value as SandpackTemplate)}
-                        >
-                          <Select.Trigger className="inline-flex items-center gap-1 rounded p-1 text-sm text-gray-400 hover:bg-gray-100 hover:text-gray-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-300">
-                            <Select.Value>
-                              <span className="max-sm:hidden">{selectedTemplate}</span>
-                              <span className="sm:hidden">🗂️</span>
-                            </Select.Value>
-                            <Select.Icon>
-                              <ChevronDownIcon className="size-3" />
-                            </Select.Icon>
-                          </Select.Trigger>
-                          <Select.Portal>
-                            <Select.Content className="overflow-hidden rounded-md bg-white shadow ring-1 ring-black/5">
-                              <Select.Viewport className="space-y-1 p-2">
-                                <Select.Item value="react-ts" className="flex cursor-pointer items-center gap-1 rounded-md p-1 text-sm data-[highlighted]:bg-gray-100 data-[highlighted]:outline-none">
-                                  <Select.ItemText className="text-gray-500">React + TypeScript</Select.ItemText>
-                                </Select.Item>
-                                <Select.Item value="react" className="flex cursor-pointer items-center gap-1 rounded-md p-1 text-sm data-[highlighted]:bg-gray-100 data-[highlighted]:outline-none">
-                                  <Select.ItemText className="text-gray-500">React</Select.ItemText>
-                                </Select.Item>
-                                <Select.Item value="nextjs" className="flex cursor-pointer items-center gap-1 rounded-md p-1 text-sm data-[highlighted]:bg-gray-100 data-[highlighted]:outline-none">
-                                  <Select.ItemText className="text-gray-500">Next.js</Select.ItemText>
-                                </Select.Item>
-                                <Select.Item value="vite-react-ts" className="flex cursor-pointer items-center gap-1 rounded-md p-1 text-sm data-[highlighted]:bg-gray-100 data-[highlighted]:outline-none">
-                                  <Select.ItemText className="text-gray-500">Vite + React + TS</Select.ItemText>
-                                </Select.Item>
-                                <Select.Item value="astro" className="flex cursor-pointer items-center gap-1 rounded-md p-1 text-sm data-[highlighted]:bg-gray-100 data-[highlighted]:outline-none">
-                                  <Select.ItemText className="text-gray-500">Astro</Select.ItemText>
-                                </Select.Item>
-                                <Select.Item value="vue-ts" className="flex cursor-pointer items-center gap-1 rounded-md p-1 text-sm data-[highlighted]:bg-gray-100 data-[highlighted]:outline-none">
-                                  <Select.ItemText className="text-gray-500">Vue + TypeScript</Select.ItemText>
-                                </Select.Item>
-                                <Select.Item value="svelte" className="flex cursor-pointer items-center gap-1 rounded-md p-1 text-sm data-[highlighted]:bg-gray-100 data-[highlighted]:outline-none">
-                                  <Select.ItemText className="text-gray-500">Svelte</Select.ItemText>
-                                </Select.Item>
-                              </Select.Viewport>
-                            </Select.Content>
-                          </Select.Portal>
-                        </Select.Root>
-                      </>
-                    )}
-                    
                     <div className="h-4 w-px bg-gray-200 max-sm:hidden" />
                     <div>
                       <label

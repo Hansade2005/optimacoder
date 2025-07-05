@@ -185,40 +185,12 @@ export function cn(...inputs: ClassValue[]) {
 // Framework export utilities
 export type FrameworkType = 'nextjs' | 'react-vite' | 'react-cra';
 
-// Sandpack template types for multifile support
-export type SandpackTemplate = 
-  | 'react' | 'react-ts' 
-  | 'nextjs' 
-  | 'vite-react' | 'vite-react-ts'
-  | 'astro'
-  | 'vue' | 'vue-ts'
-  | 'svelte'
-  | 'vanilla' | 'vanilla-ts'
-  | 'solid';
-
-export interface ProjectFile {
-  path: string;
-  content: string;
-}
-
-export interface MultiFileProject {
-  template: SandpackTemplate;
-  files: ProjectFile[];
-  mainFile?: string; // Entry point file for the component
-  dependencies?: Record<string, string>;
-}
-
 export interface ExportConfig {
   framework: FrameworkType;
   projectName: string;
   componentCode: string;
   language: string;
   dependencies?: string[];
-}
-
-// Extended config for multifile projects
-export interface MultiFileExportConfig extends Omit<ExportConfig, 'componentCode'> {
-  project: MultiFileProject;
 }
 
 function normalizeImportPaths(code: string, framework: FrameworkType): string {
@@ -243,100 +215,6 @@ function normalizeImportPaths(code: string, framework: FrameworkType): string {
   }
   
   return normalizedCode;
-}
-
-// Utility functions for multifile projects
-export function createMultiFileProject(
-  template: SandpackTemplate,
-  files: ProjectFile[],
-  mainFile?: string,
-  dependencies?: Record<string, string>
-): MultiFileProject {
-  return {
-    template,
-    files,
-    mainFile,
-    dependencies
-  };
-}
-
-export function parseCodeBlocksToProject(input: string, template: SandpackTemplate = 'react-ts'): MultiFileProject {
-  const files: ProjectFile[] = [];
-  let mainFile: string | undefined;
-
-  // Look for code blocks with filenames
-  const codeBlockRegex = /```([^\n]*)\n([\s\S]*?)\n```/g;
-  let match;
-
-  while ((match = codeBlockRegex.exec(input)) !== null) {
-    const fenceTag = match[1] || "";
-    const code = match[2];
-
-    // Parse filename from fence tag (e.g., "tsx{filename=App.tsx}" or "javascript:src/components/Button.tsx")
-    let filename: string | null = null;
-    
-    // Method 1: {filename=...} syntax
-    const filenameMatch = fenceTag.match(/{\s*filename\s*=\s*([^}]+)\s*}/);
-    if (filenameMatch) {
-      filename = filenameMatch[1].trim();
-    }
-    
-    // Method 2: language:filepath syntax (e.g., "tsx:src/App.tsx")
-    const pathMatch = fenceTag.match(/^[a-zA-Z]*:(.+)/);
-    if (pathMatch && !filename) {
-      filename = pathMatch[1].trim();
-    }
-    
-    // Method 3: Just a filepath after language (e.g., "tsx src/App.tsx")
-    const simplePathMatch = fenceTag.match(/^[a-zA-Z]+\s+(.+)/);
-    if (simplePathMatch && !filename) {
-      filename = simplePathMatch[1].trim();
-    }
-
-    if (filename) {
-      // Ensure proper path format
-      const normalizedPath = filename.startsWith('/') ? filename : `/${filename}`;
-      files.push({
-        path: normalizedPath,
-        content: code
-      });
-
-      // Set main file if it looks like an entry point
-      if (!mainFile && (
-        filename.includes('App.') || 
-        filename.includes('main.') || 
-        filename.includes('index.')
-      )) {
-        mainFile = normalizedPath;
-      }
-    }
-  }
-
-  // If no files found, treat as single file
-  if (files.length === 0) {
-    const codeBlock = extractFirstCodeBlock(input);
-    if (codeBlock) {
-      const filename = codeBlock.filename ? 
-        `/${codeBlock.filename.name}.${codeBlock.filename.extension}` : 
-        '/App.tsx';
-      files.push({
-        path: filename,
-        content: codeBlock.code
-      });
-      mainFile = filename;
-    }
-  }
-
-  return createMultiFileProject(template, files, mainFile);
-}
-
-export function convertSingleFileToProject(code: string, template: SandpackTemplate = 'react-ts'): MultiFileProject {
-  return createMultiFileProject(template, [
-    {
-      path: '/App.tsx',
-      content: code
-    }
-  ], '/App.tsx');
 }
 
 export function generateFrameworkStructure(config: ExportConfig) {

@@ -24,11 +24,19 @@ const ExportToGitHub = dynamic(() => import("@/components/export-to-github"), {
 
 const CodeRunner = dynamic(() => import("@/components/code-runner"), {
   ssr: false,
-  loading: () => <div className="flex items-center justify-center p-4">Loading code runner...</div>,
+  loading: () => (
+    <div className="flex items-center justify-center p-4">
+      Loading code runner...
+    </div>
+  ),
 });
 const SyntaxHighlighter = dynamic(() => import("@/components/syntax-highlighter"), {
   ssr: false,
-  loading: () => <div className="flex items-center justify-center p-4">Loading syntax highlighter...</div>,
+  loading: () => (
+    <div className="flex items-center justify-center p-4">
+      Loading syntax highlighter...
+    </div>
+  ),
 });
 
 export default function CodeViewer({
@@ -54,16 +62,18 @@ export default function CodeViewer({
   const streamAppParts = splitByFirstCodeFence(streamText);
   const streamApp = streamAppParts.find(
     (p) =>
-      p.type === "first-code-fence-generating" || p.type === "first-code-fence",
+      p.type === "first-code-fence-generating" || p.type === "first-code-fence"
   );
   const streamAppIsGenerating = streamAppParts.some(
-    (p) => p.type === "first-code-fence-generating",
+    (p) => p.type === "first-code-fence-generating"
   );
 
   const code = streamApp ? streamApp.content : app?.code || "";
   const language = streamApp ? streamApp.language : app?.language || "";
   const title = streamApp ? streamApp.filename.name : app?.filename?.name || "";
-  const layout = ["python", "ts", "js", "javascript", "typescript"].includes(language)
+  const layout = ["python", "ts", "js", "javascript", "typescript"].includes(
+    language
+  )
     ? "two-up"
     : "tabbed";
 
@@ -127,14 +137,18 @@ export default function CodeViewer({
           {activeTab === "code" ? (
             // Show Sandpack editor + file explorer in Code tab
             <SandpackProvider
-              template={language === "typescript" || language === "ts" ? "react-ts" : "react"}
+              template={
+                language === "typescript" || language === "ts"
+                  ? "react-ts"
+                  : "react"
+              }
               files={{
                 "/App.tsx": code || "// no code available",
               }}
               options={{
                 visibleFiles: ["/App.tsx"],
                 activeFile: "/App.tsx",
-                editorHeight: 600,
+                // removed editorHeight here as it is not a valid option
               }}
             >
               <SandpackLayout className="flex-grow border border-gray-300 rounded-md">
@@ -145,6 +159,7 @@ export default function CodeViewer({
                   showInlineErrors
                   wrapContent
                   closableTabs
+                  style={{ height: 600 }}
                 />
               </SandpackLayout>
             </SandpackProvider>

@@ -46,6 +46,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/clsx": "^0.0.33",
     "eslint": "^8",
     "eslint-config-next": "15.1.4",
     "postcss": "^8",
@@ -54,5 +55,12 @@
     "prisma": "^6.2.1",
     "tailwindcss": "^3.4.17",
     "typescript": "^5"
+  },
+  "scripts": {
+    "dev": "next dev",
+    "build": "prisma generate && prisma migrate deploy && next build",
+    "start": "next start",
+    "lint": "next lint",
+    "postinstall": "prisma generate"
   }
 }

@@ -1,14 +1,4 @@
 {
-  "name": "llamacoder-new",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "postinstall": "prisma generate",
-    "dev": "next dev",
-    "build": "prisma generate && prisma migrate deploy && next build",
-    "start": "next start",
-    "lint": "next lint && tsc --noEmit --noUnusedLocals"
-  },
   "dependencies": {
     "@codesandbox/sandpack-react": "^2.19.10",
     "@codesandbox/sandpack-themes": "^2.0.21",
@@ -31,6 +21,7 @@
     "@tailwindcss/typography": "^0.5.15",
     "@vercel/og": "^0.6.4",
     "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
     "date-fns": "^4.1.0",
     "dedent": "^1.5.3",
     "framer-motion": "^11.18.0",
@@ -55,6 +46,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/clsx": "^0.0.33",
     "eslint": "^8",
     "eslint-config-next": "15.1.4",
     "postcss": "^8",

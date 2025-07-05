@@ -158,7 +158,7 @@ export async function createChat(
           data: [
             {
               role: "system",
-              content: getMainCodingPrompt(mostSimilarExample),
+              content: getMainCodingPrompt(mostSimilarExample as import("@/lib/prompts").ExampleKey),
               position: 0,
             },
             { role: "user", content: userMessage, position: 1 },

@@ -14,9 +14,10 @@ import dynamic from "next/dynamic";
 import {
   SandpackProvider,
   SandpackLayout,
-  SandpackFileExplorer,
   SandpackCodeEditor,
 } from "@codesandbox/sandpack-react";
+
+import { SandpackFileExplorer } from "sandpack-file-explorer"; 
 
 const ExportToGitHub = dynamic(() => import("@/components/export-to-github"), {
   ssr: false,

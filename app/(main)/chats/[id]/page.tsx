@@ -10,9 +10,15 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const id = (await params).id;
-  const chat = await getChatById(id);
+  const chatData = await getChatById(id);
 
-  if (!chat) notFound();
+  if (!chatData) notFound();
+
+  // Explicitly cast the template property to SandpackPredefinedTemplate
+  const chat: Chat = {
+    ...chatData,
+    template: chatData.template as SandpackPredefinedTemplate,
+  };
 
   return <PageClient chat={chat} />;
 }

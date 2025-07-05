@@ -1,18 +1,14 @@
 "use client";
 
-import { useState } from "react";
-
+import React from "react"; // Explicitly import React
 import { TEMPLATES } from "@/lib/constants";
 
 type SandpackTemplate = "react-ts" | "react" | "vue" | "angular" | "svelte" | "solid" | "vanilla";
 
-export default function TemplateSelector({
-  value,
-  onChange,
-}: {
+const TemplateSelector: React.FC<{
   value: string;
   onChange: (template: SandpackTemplate) => void;
-}) {
+}> = ({ value, onChange }) => {
   return (
     <div className="flex items-center gap-1">
       <label className="text-xs font-medium text-gray-500">Template:</label>
@@ -30,4 +26,6 @@ export default function TemplateSelector({
       </select>
     </div>
   );
-}
+};
+
+export default TemplateSelector;

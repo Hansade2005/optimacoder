@@ -63,9 +63,7 @@ export default function CodeViewer({
   const code = streamApp ? streamApp.content : app?.code || "";
   const language = streamApp ? streamApp.language : app?.language || "";
   const title = streamApp ? streamApp.filename.name : app?.filename?.name || "";
-  const layout = ["python", "ts", "js", "javascript", "typescript"].includes(
-    language,
-  )
+  const layout = ["python", "ts", "js", "javascript", "typescript"].includes(language)
     ? "two-up"
     : "tabbed";
 
@@ -73,8 +71,8 @@ export default function CodeViewer({
   const currentVersion = streamApp
     ? assistantMessages.length
     : message
-      ? assistantMessages.map((m) => m.id).indexOf(message.id)
-      : 1;
+    ? assistantMessages.map((m) => m.id).indexOf(message.id)
+    : 1;
   const previousMessage =
     currentVersion !== 0 ? assistantMessages.at(currentVersion - 1) : undefined;
   const nextMessage =
@@ -129,18 +127,13 @@ export default function CodeViewer({
           {activeTab === "code" ? (
             // Show Sandpack editor + file explorer in Code tab
             <SandpackProvider
-              template={
-                language === "typescript" || language === "ts"
-                  ? "react-ts"
-                  : "react"
-              }
+              template={language === "typescript" || language === "ts" ? "react-ts" : "react"}
               files={{
                 "/App.tsx": code || "// no code available",
               }}
               options={{
                 visibleFiles: ["/App.tsx"],
                 activeFile: "/App.tsx",
-                showNavigator: false,
                 editorHeight: 600,
               }}
             >

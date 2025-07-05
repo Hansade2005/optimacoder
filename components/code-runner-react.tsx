@@ -11,27 +11,28 @@ import {
 } from "@codesandbox/sandpack-react";
 import dedent from "dedent";
 import { CheckIcon, CopyIcon } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, ReactNode } from "react";
 
-export default function ReactCodeRunner({
-  code,
-  template: initialTemplate,
+// Component to wrap SandpackProvider and manage its state
+export function SandpackContainer({
+  initialCode,
+  initialTemplate,
   onRequestFix,
+  children,
 }: {
-  code: string;
-  template?: string;
+  initialCode: string;
+  initialTemplate?: string;
   onRequestFix?: (e: string) => void;
+  children: ReactNode;
 }) {
   type SandpackTemplate = "react-ts" | "react" | "vue" | "angular" | "svelte" | "solid" | "vanilla";
   const [template, setTemplate] = useState<SandpackTemplate>((initialTemplate as SandpackTemplate) || "react-ts");
-  // Track files and tab state
   const [files, setFiles] = useState<{ [key: string]: any }>({
-    "/App.tsx": code,
+    "/App.tsx": initialCode,
   });
   const [visibleFiles, setVisibleFiles] = useState<string[]>(["/App.tsx"]);
   const [activeFile, setActiveFile] = useState<string>("/App.tsx");
 
-  // Helper to add/update files and manage tabs (max 3 open)
   const openFile = (filePath: string, fileCode: string) => {
     setFiles((prev) => ({ ...prev, [filePath]: fileCode }));
     setVisibleFiles((prev) => {
@@ -43,12 +44,11 @@ export default function ReactCodeRunner({
     setActiveFile(filePath);
   };
 
-  // Example: update files when code prop changes (AI streaming)
   useEffect(() => {
-    if (code && code !== files["/App.tsx"]) {
-      openFile("/App.tsx", code);
+    if (initialCode && initialCode !== files["/App.tsx"]) {
+      openFile("/App.tsx", initialCode);
     }
-  }, [code]);
+  }, [initialCode]);
 
   return (
     <SandpackProvider
@@ -72,26 +72,39 @@ export default function ReactCodeRunner({
           onChange={(newTemplate: SandpackTemplate) => setTemplate(newTemplate)}
         />
       </div>
-      <SandpackLayout>
-        <SandpackFileExplorer />
-        <SandpackCodeEditor
-          showTabs
-          showLineNumbers={false}
-          showInlineErrors
-          wrapContent
-          closableTabs
-        />
-        <SandpackPreview
-          showNavigator={false}
-          showOpenInCodeSandbox={false}
-          showRefreshButton={false}
-          showRestartButton={false}
-          showOpenNewtab={false}
-          className="h-full w-full"
-        />
-      </SandpackLayout>
+      {children}
       {onRequestFix && <ErrorMessage onRequestFix={onRequestFix} />}
     </SandpackProvider>
+  );
+}
+
+// Component for the code editor and file explorer pane
+export function SandpackEditorPane() {
+  return (
+    <SandpackLayout>
+      <SandpackFileExplorer />
+      <SandpackCodeEditor
+        showTabs
+        showLineNumbers={false}
+        showInlineErrors
+        wrapContent
+        closableTabs
+      />
+    </SandpackLayout>
+  );
+}
+
+// Component for the preview pane
+export function SandpackPreviewPane() {
+  return (
+    <SandpackPreview
+      showNavigator={false}
+      showOpenInCodeSandbox={false}
+      showRefreshButton={false}
+      showRestartButton={false}
+      showOpenNewtab={false}
+      className="h-full w-full"
+    />
   );
 }
 
@@ -141,46 +154,6 @@ function ErrorMessage({ onRequestFix }: { onRequestFix: (e: string) => void }) {
   );
 }
 
-function getShadcnFiles(shadcnComponents: any) {
-  return {
-    "/lib/utils.ts": shadcnComponents.utils,
-    "/components/ui/avatar.tsx": shadcnComponents.avatar,
-    "/components/ui/button.tsx": shadcnComponents.button,
-    "/components/ui/card.tsx": shadcnComponents.card,
-    "/components/ui/checkbox.tsx": shadcnComponents.checkbox,
-    "/components/ui/input.tsx": shadcnComponents.input,
-    "/components/ui/label.tsx": shadcnComponents.label,
-    "/components/ui/radio-group.tsx": shadcnComponents.radioGroup,
-    "/components/ui/select.tsx": shadcnComponents.select,
-    "/components/ui/textarea.tsx": shadcnComponents.textarea,
-    "/components/ui/index.tsx": `
-    export * from "./button"
-    export * from "./card"
-    export * from "./input"
-    export * from "./label"
-    export * from "./select"
-    export * from "./textarea"
-    export * from "./avatar"
-    export * from "./radio-group"
-    export * from "./checkbox"
-    `,
-    "/public/index.html": dedent`
-      <!DOCTYPE html>
-      <html lang="en">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Document</title>
-          <script src="https://cdn.tailwindcss.com"></script>
-        </head>
-        <body>
-          <div id="root"></div>
-        </body>
-      </html>
-    `,
-  };
-}
-
 const dependencies = {
   "lucide-react": "latest",
   recharts: "2.9.0",
@@ -220,5 +193,3 @@ const dependencies = {
   "framer-motion": "^11.15.0",
   vaul: "^0.9.1",
 };
-
-

@@ -1,14 +1,10 @@
-import { notFound } from "next/navigation";
-import type { Metadata } from "next";
-import { cache } from "react";
 import CodeRunner from "@/components/code-runner";
 import { getPrisma } from "@/lib/prisma";
+import { extractFirstCodeBlock } from "@/lib/utils";
+import { Metadata } from "next";
+import { notFound } from "next/navigation";
+import { cache } from "react";
 
-/*
-  This is the Share page for v1 apps, before the chat interface was added.
-
-  It's here to preserve existing URLs.
-*/
 export async function generateMetadata({
   params,
 }: {
@@ -44,7 +40,6 @@ export default async function Page({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  // if process.env.DATABASE_URL is not set, throw an error
   if (typeof id !== "string") {
     notFound();
   }
@@ -57,7 +52,7 @@ export default async function Page({
 
   return (
     <div className="flex h-full w-full grow items-center justify-center">
-      <CodeRunner language="tsx" code={generatedApp.code} />
+      <CodeRunner language={generatedApp.code} code={generatedApp.code} renderMode="preview" />
     </div>
   );
 }

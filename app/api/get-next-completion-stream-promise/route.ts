@@ -5,7 +5,7 @@ import { z } from "zod";
 import Together from "together-ai";
 
 export async function POST(req: Request) {
-  const neon = new Pool({ connectionString: process.env.DATABASE_URL });
+  const neon = new Pool(process.env.DATABASE_URL);
   const adapter = new PrismaNeon(neon);
   const prisma = new PrismaClient({ adapter });
   const { messageId, model } = await req.json();

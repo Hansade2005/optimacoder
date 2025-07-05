@@ -2,19 +2,23 @@
 
 import { Suspense, lazy, useState } from "react";
 
-// Lazy load the heavy Sandpack component
-const SandpackCodeRunner = lazy(() => import("./code-runner-react"));
+const SandpackContainer = lazy(() => import("./code-runner-react").then(m => ({ default: m.SandpackContainer })));
+export const SandpackEditorPane = lazy(() => import("./code-runner-react").then(m => ({ default: m.SandpackEditorPane })));
+export const SandpackPreviewPane = lazy(() => import("./code-runner-react").then(m => ({ default: m.SandpackPreviewPane })));
+
 
 export default function LazyCodeRunner({
   language,
   code,
   template,
   onRequestFix,
+  renderMode
 }: {
   language: string;
   code: string;
   template?: string;
   onRequestFix?: (e: string) => void;
+  renderMode: 'editor' | 'preview';
 }) {
   const [shouldLoadSandpack, setShouldLoadSandpack] = useState(true);
 
@@ -33,7 +37,7 @@ export default function LazyCodeRunner({
   }
 
   return (
-    <Suspense 
+    <Suspense
       fallback={
         <div className="flex items-center justify-center p-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
@@ -41,7 +45,9 @@ export default function LazyCodeRunner({
         </div>
       }
     >
-      <SandpackCodeRunner code={code} template={template} onRequestFix={onRequestFix} />
+      <SandpackContainer initialCode={code} initialTemplate={template} onRequestFix={onRequestFix}>
+        {renderMode === 'editor' ? <SandpackEditorPane /> : <SandpackPreviewPane />}
+      </SandpackContainer>
     </Suspense>
   );
 }

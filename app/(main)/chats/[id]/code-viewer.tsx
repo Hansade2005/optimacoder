@@ -11,14 +11,12 @@ import { Share } from "./share";
 import { StickToBottom } from "use-stick-to-bottom";
 import dynamic from "next/dynamic";
 
+import { SandpackContainer, SandpackEditorPane, SandpackPreviewPane } from "@/components/code-runner-react";
+
 const ExportToGitHub = dynamic(() => import("@/components/export-to-github"), {
   ssr: false,
 });
 
-const CodeRunner = dynamic(() => import("@/components/code-runner"), {
-  ssr: false,
-  loading: () => <div className="flex items-center justify-center p-4">Loading code runner...</div>
-});
 const SyntaxHighlighter = dynamic(
   () => import("@/components/syntax-highlighter"),
   {
@@ -115,54 +113,49 @@ export default function CodeViewer({
         )}
       </div>
 
-      {layout === "tabbed" ? (
-        <div className="flex grow flex-col overflow-y-auto bg-white">
-          {activeTab === "code" ? (
-            <StickToBottom
-              className="relative grow overflow-hidden"
-              resize="smooth"
-              initial={streamAppIsGenerating ? "smooth" : false}
-            >
-              <StickToBottom.Content>
-                <SyntaxHighlighter code={code} language={language} />
-              </StickToBottom.Content>
-            </StickToBottom>
-          ) : (
-            <>
-              {language && (
-                <div className="flex h-full items-center justify-center">
-                  <CodeRunner
-                    onRequestFix={onRequestFix}
-                    language={language}
-                    code={code}
-                    template={chat.template}
-                    key={refresh}
-                  />
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      ) : (
-        <div className="flex grow flex-col bg-white">
-          <div className="h-1/2 overflow-y-auto">
-            <SyntaxHighlighter code={code} language={language} />
-          </div>
-          <div className="flex h-1/2 flex-col">
-            <div className="border-t border-gray-300 px-4 py-4">Output</div>
-            <div className="flex grow items-center justify-center border-t">
-              {!streamAppIsGenerating && (
-                <CodeRunner
-                  onRequestFix={onRequestFix}
-                  language={language}
-                  code={code}
-                  template={chat.template}
-                  key={refresh}
-                />
+      {language && (
+        <SandpackContainer
+          initialCode={code}
+          initialTemplate={chat.template}
+          onRequestFix={onRequestFix}
+          key={refresh}
+        >
+          {layout === "tabbed" ? (
+            <div className="flex grow flex-col overflow-y-auto bg-white">
+              {activeTab === "code" ? (
+                <StickToBottom
+                  className="relative grow overflow-hidden"
+                  resize="smooth"
+                  initial={streamAppIsGenerating ? "smooth" : false}
+                >
+                  <StickToBottom.Content>
+                    <SandpackEditorPane />
+                  </StickToBottom.Content>
+                </StickToBottom>
+              ) : (
+                <>
+                  <div className="flex h-full items-center justify-center">
+                    <SandpackPreviewPane />
+                  </div>
+                </>
               )}
             </div>
-          </div>
-        </div>
+          ) : (
+            <div className="flex grow flex-col bg-white">
+              <div className="h-1/2 overflow-y-auto">
+                <SyntaxHighlighter code={code} language={language} />
+              </div>
+              <div className="flex h-1/2 flex-col">
+                <div className="border-t border-gray-300 px-4 py-4">Output</div>
+                <div className="flex grow items-center justify-center border-t">
+                  {!streamAppIsGenerating && (
+                    <SandpackPreviewPane />
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </SandpackContainer>
       )}
 
       <div className="flex items-center justify-between border-t border-gray-300 px-4 py-4">

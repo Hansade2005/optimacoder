@@ -1,20 +1,40 @@
-import LazyCodeRunner, { SandpackEditorPane as LazySandpackEditorPane, SandpackPreviewPane as LazySandpackPreviewPane } from "./code-runner-lazy";
-
-export const SandpackEditorPane = LazySandpackEditorPane;
-export const SandpackPreviewPane = LazySandpackPreviewPane;
+// import {
+//   runJavaScriptCode,
+//   runPythonCode,
+// } from "@/components/code-runner-actions";
+// import CodeRunnerServerAction from "@/components/code-runner-server-action";
+import LazyCodeRunner from "./code-runner-lazy";
 
 export default function CodeRunner({
   language,
   code,
   template,
   onRequestFix,
-  renderMode
 }: {
   language: string;
   code: string;
   template?: string;
   onRequestFix?: (e: string) => void;
-  renderMode: 'editor' | 'preview';
 }) {
-  return <LazyCodeRunner language={language} code={code} template={template} onRequestFix={onRequestFix} renderMode={renderMode} />;
+  return <LazyCodeRunner language={language} code={code} template={template} onRequestFix={onRequestFix} />;
+
+  // return (
+  //   <>
+  //     {language === "python" ? (
+  //       <CodeRunnerServerAction
+  //         code={code}
+  //         runCodeAction={runPythonCode}
+  //         key={code}
+  //       />
+  //     ) : ["ts", "js", "javascript", "typescript"].includes(language) ? (
+  //       <CodeRunnerServerAction
+  //         code={code}
+  //         runCodeAction={runJavaScriptCode}
+  //         key={code}
+  //       />
+  //     ) : (
+  //       <CodeRunnerReact code={code} />
+  //     )}
+  //   </>
+  // );
 }

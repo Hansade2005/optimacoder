@@ -8,7 +8,6 @@ import {
   SandpackCodeEditor,
   SandpackPreview,
   useSandpack,
-  SandpackPredefinedTemplate, // Import SandpackPredefinedTemplate
 } from "@codesandbox/sandpack-react";
 import dedent from "dedent";
 import { CheckIcon, CopyIcon } from "lucide-react";
@@ -20,10 +19,11 @@ export default function ReactCodeRunner({
   onRequestFix,
 }: {
   code: string;
-  template?: SandpackPredefinedTemplate; // Use SandpackPredefinedTemplate type
+  template?: string;
   onRequestFix?: (e: string) => void;
 }) {
-  const [template, setTemplate] = useState<SandpackPredefinedTemplate>(initialTemplate || "react-ts");
+  type SandpackTemplate = "react-ts" | "react" | "vue" | "angular" | "svelte" | "solid" | "vanilla";
+  const [template, setTemplate] = useState<SandpackTemplate>((initialTemplate as SandpackTemplate) || "react-ts");
   // Track files and tab state
   const [files, setFiles] = useState<{ [key: string]: any }>({
     "/App.tsx": code,
@@ -48,7 +48,7 @@ export default function ReactCodeRunner({
     if (code && code !== files["/App.tsx"]) {
       openFile("/App.tsx", code);
     }
-  }, [code, files]); // Added 'files' to dependency array as per ESLint warning
+  }, [code]);
 
   return (
     <SandpackProvider
@@ -69,7 +69,7 @@ export default function ReactCodeRunner({
       <div className="absolute top-2 right-2 z-10">
         <TemplateSelector
           value={template}
-          onChange={(newTemplate: SandpackPredefinedTemplate) => setTemplate(newTemplate)}
+          onChange={(newTemplate: SandpackTemplate) => setTemplate(newTemplate)}
         />
       </div>
       <SandpackLayout>
@@ -220,3 +220,5 @@ const dependencies = {
   "framer-motion": "^11.15.0",
   vaul: "^0.9.1",
 };
+
+

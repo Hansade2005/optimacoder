@@ -1,48 +1,40 @@
-"use client";
-
-import { SandpackProvider, SandpackPreview } from "@codesandbox/sandpack-react";
+// import {
+//   runJavaScriptCode,
+//   runPythonCode,
+// } from "@/components/code-runner-actions";
+// import CodeRunnerServerAction from "@/components/code-runner-server-action";
 import LazyCodeRunner from "./code-runner-lazy";
-import { SandpackPredefinedTemplate } from "@codesandbox/sandpack-react"; // Import SandpackPredefinedTemplate
-
-interface CodeRunnerProps {
-  language: string;
-  code: string;
-  template?: SandpackPredefinedTemplate; // Use SandpackPredefinedTemplate type
-  onRequestFix?: (e: string) => void;
-  showEditor?: boolean;
-}
 
 export default function CodeRunner({
   language,
   code,
   template,
   onRequestFix,
-  showEditor = true,
-}: CodeRunnerProps) {
-  if (!showEditor) {
-    return (
-      <SandpackProvider
-        template={template || "react-ts"}
-        files={{
-          '/App.tsx': code,
-        }}
-        options={{
-          externalResources: [
-            "https://unpkg.com/@tailwindcss/ui/dist/tailwind-ui.min.css",
-          ],
-        }}
-      >
-        <SandpackPreview 
-          showNavigator={false}
-          showOpenInCodeSandbox={false}
-          showRefreshButton={false}
-          showRestartButton={false}
-          showOpenNewtab={false}
-          className="h-full w-full"
-        />
-      </SandpackProvider>
-    );
-  }
-
+}: {
+  language: string;
+  code: string;
+  template?: string;
+  onRequestFix?: (e: string) => void;
+}) {
   return <LazyCodeRunner language={language} code={code} template={template} onRequestFix={onRequestFix} />;
+
+  // return (
+  //   <>
+  //     {language === "python" ? (
+  //       <CodeRunnerServerAction
+  //         code={code}
+  //         runCodeAction={runPythonCode}
+  //         key={code}
+  //       />
+  //     ) : ["ts", "js", "javascript", "typescript"].includes(language) ? (
+  //       <CodeRunnerServerAction
+  //         code={code}
+  //         runCodeAction={runJavaScriptCode}
+  //         key={code}
+  //       />
+  //     ) : (
+  //       <CodeRunnerReact code={code} />
+  //     )}
+  //   </>
+  // );
 }

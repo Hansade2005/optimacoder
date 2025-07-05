@@ -22,7 +22,6 @@ import UploadIcon from "@/components/icons/upload-icon";
 import { XCircleIcon } from "@heroicons/react/20/solid";
 import { MODELS, SUGGESTED_PROMPTS, TEMPLATES } from "@/lib/constants";
 import TemplateSelector from "@/components/template-selector";
-import { SandpackPredefinedTemplate } from "@codesandbox/sandpack-react"; // Import SandpackPredefinedTemplate
 
 
 export default function Home() {
@@ -32,7 +31,7 @@ export default function Home() {
   const [prompt, setPrompt] = useState("");
   const [model, setModel] = useState(MODELS[0].value);
   const [quality, setQuality] = useState("high");
-  const [template, setTemplate] = useState<SandpackPredefinedTemplate>(TEMPLATES[0].value as SandpackPredefinedTemplate); // default React TS, typed as SandpackPredefinedTemplate
+  const [template, setTemplate] = useState(TEMPLATES[0].value); // default React TS
   const [screenshotUrl, setScreenshotUrl] = useState<string | undefined>(undefined);
   const [screenshotLoading, setScreenshotLoading] = useState(false);
   const selectedModel = MODELS.find((m) => m.value === model);
@@ -99,14 +98,14 @@ export default function Home() {
                 assert.ok(typeof prompt === "string");
                 assert.ok(typeof model === "string");
                 assert.ok(quality === "high" || quality === "low");
-                assert.ok(typeof template === "string"); // Keep as string for form data, but cast for createChat
+                // assert.ok(typeof template === "string");
 
                 const { chatId, lastMessageId } = await createChat(
                   prompt,
                   model,
                   quality,
                   screenshotUrl,
-                  template as SandpackPredefinedTemplate // Cast to SandpackPredefinedTemplate
+                  template as string
                 );
 
                 const streamPromise = fetch(

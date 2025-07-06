@@ -138,7 +138,7 @@ export default function PageClient({ chat }: { chat: Chat }) {
               message={activeMessage}
               onMessageChange={setActiveMessage}
               activeTab={activeTab}
-              onTabChange={setTab}
+              onTabChange={setActiveTab}
               onClose={() => {
                 setActiveMessage(undefined);
                 setIsShowingCodeViewer(false);

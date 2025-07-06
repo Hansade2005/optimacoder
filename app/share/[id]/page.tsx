@@ -55,9 +55,11 @@ export default async function Page({
     return <div>App not found</div>;
   }
 
+  const files = { "/App.tsx": generatedApp.code };
+
   return (
     <div className="flex h-full w-full grow items-center justify-center">
-      <CodeRunner language="tsx" code={generatedApp.code} />
+      <CodeRunner language="tsx" files={files} />
     </div>
   );
 }

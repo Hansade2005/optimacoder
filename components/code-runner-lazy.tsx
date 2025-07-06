@@ -7,12 +7,12 @@ const SandpackCodeRunner = lazy(() => import("./code-runner-react"));
 
 export default function LazyCodeRunner({
   language,
-  code,
+  files,
   template,
   onRequestFix,
 }: {
   language: string;
-  code: string;
+  files: { [key: string]: string };
   template?: string;
   onRequestFix?: (e: string) => void;
 }) {
@@ -41,7 +41,7 @@ export default function LazyCodeRunner({
         </div>
       }
     >
-      <SandpackCodeRunner code={code} template={template} onRequestFix={onRequestFix} />
+      <SandpackCodeRunner files={files} template={template} onRequestFix={onRequestFix} />
     </Suspense>
   );
 }

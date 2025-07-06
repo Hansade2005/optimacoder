@@ -4,11 +4,11 @@ import ChevronLeftIcon from "@/components/icons/chevron-left";
 import ChevronRightIcon from "@/components/icons/chevron-right";
 import CloseIcon from "@/components/icons/close-icon";
 import RefreshIcon from "@/components/icons/refresh";
-import { extractFirstCodeBlock, splitByFirstCodeFence } from "@/lib/utils";
+import { extractAllCodeBlocks, splitByFirstCodeFence } from "@/lib/utils";
 import { useState } from "react";
 import type { Chat, Message } from "./page";
 import { Share } from "./share";
-import { StickToBottom } from "use-stick-to-bottom";
+
 import dynamic from "next/dynamic";
 
 import {
@@ -58,7 +58,7 @@ export default function CodeViewer({
   onClose: () => void;
   onRequestFix: (e: string) => void;
 }) {
-  const app = message ? extractFirstCodeBlock(message.content) : undefined;
+  const apps = message ? extractAllCodeBlocks(message.content) : [];
   const streamAppParts = splitByFirstCodeFence(streamText);
   const streamApp = streamAppParts.find(
     (p) =>
@@ -68,9 +68,21 @@ export default function CodeViewer({
     (p) => p.type === "first-code-fence-generating"
   );
 
-  const code = streamApp ? streamApp.content : app?.code || "";
-  const language = streamApp ? streamApp.language : app?.language || "";
-  const title = streamApp ? streamApp.filename.name : app?.filename?.name || "";
+  const codeBlocks = streamApp
+    ? [{ code: streamApp.content, language: streamApp.language, filename: streamApp.filename }]
+    : apps;
+
+  const files = codeBlocks.reduce((acc, block) => {
+    if (block.filename) {
+      const path = `/${block.filename.name}.${block.filename.extension}`;
+      acc[path] = block.code || "// no code available";
+    }
+    return acc;
+  }, {} as Record<string, string>);
+
+  const mainFile = Object.keys(files)[0] || "/App.tsx";
+  const language = codeBlocks[0]?.language || "";
+  const title = codeBlocks[0]?.filename?.name || "";
   const layout = ["python", "ts", "js", "javascript", "typescript"].includes(
     language
   )
@@ -81,7 +93,7 @@ export default function CodeViewer({
   const currentVersion = streamApp
     ? assistantMessages.length
     : message
-    ? assistantMessages.map((m) => m.id).indexOf(message.id)
+    ? Math.max(0, assistantMessages.map((m) => m.id).indexOf(message.id))
     : 1;
   const previousMessage =
     currentVersion !== 0 ? assistantMessages.at(currentVersion - 1) : undefined;
@@ -142,12 +154,10 @@ export default function CodeViewer({
                   ? "react-ts"
                   : "react"
               }
-              files={{
-                "/App.tsx": code || "// no code available",
-              }}
+              files={files}
               options={{
-                visibleFiles: ["/App.tsx"],
-                activeFile: "/App.tsx",
+                visibleFiles: Object.keys(files),
+                activeFile: mainFile,
                 // removed editorHeight here as it is not a valid option
               }}
             >
@@ -169,7 +179,7 @@ export default function CodeViewer({
                 <CodeRunner
                   onRequestFix={onRequestFix}
                   language={language}
-                  code={code}
+                  files={files}
                   template={chat.template}
                   key={refresh}
                 />
@@ -181,7 +191,7 @@ export default function CodeViewer({
         // Two-up layout for python, ts, js, etc.
         <div className="flex grow flex-col bg-white">
           <div className="h-1/2 overflow-y-auto">
-            <SyntaxHighlighter code={code} language={language} />
+            <SyntaxHighlighter code={Object.values(files)[0] as string || ''} language={language} />
           </div>
           <div className="flex h-1/2 flex-col">
             <div className="border-t border-gray-300 px-4 py-4">Output</div>
@@ -190,7 +200,7 @@ export default function CodeViewer({
                 <CodeRunner
                   onRequestFix={onRequestFix}
                   language={language}
-                  code={code}
+                  files={files}
                   template={chat.template}
                   key={refresh}
                 />
@@ -212,7 +222,7 @@ export default function CodeViewer({
             <RefreshIcon className="size-3" />
             Refresh
           </button>
-          {!streamAppIsGenerating && code && (
+          {!streamAppIsGenerating && Object.keys(files).length > 0 && (
             <button
               className="inline-flex items-center gap-1 rounded border border-blue-300 bg-blue-50 px-1.5 py-0.5 text-sm text-blue-600 transition enabled:hover:bg-blue-100 disabled:opacity-50"
               onClick={() => setShowExportModal(true)}
@@ -272,7 +282,7 @@ export default function CodeViewer({
       </div>
 
       <ExportToGitHub
-        componentCode={code}
+        files={files}
         language={language}
         isOpen={showExportModal}
         onClose={() => setShowExportModal(false)}

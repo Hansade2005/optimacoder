@@ -10,40 +10,37 @@ import {
   select as shadcnSelect,
 } from "./shadcn-essential";
 
-export function extractFirstCodeBlock(input: string) {
-  // 1) We use a more general pattern for the code fence:
-  //    - ^```([^\n]*) captures everything after the triple backticks up to the newline.
-  //    - ([\s\S]*?) captures the *body* of the code block (non-greedy).
-  //    - Then we look for a closing backticks on its own line (\n```).
-  // The 'm' (multiline) flag isn't strictly necessary here, but can help if input is multiline.
-  // The '([\s\S]*?)' is a common trick to match across multiple lines non-greedily.
-  const match = input.match(/```([^\n]*)\n([\s\S]*?)\n```/);
+export function extractAllCodeBlocks(input: string) {
+  const codeBlocks = [];
+  const regex = /```([^\n]*)\n([\s\S]*?)\n```/g;
+  let match;
 
-  if (match) {
-    const fenceTag = match[1] || ""; // e.g. "tsx{filename=Calculator.tsx}"
-    const code = match[2]; // The actual code block content
-    const fullMatch = match[0]; // Entire matched string including backticks
+  while ((match = regex.exec(input)) !== null) {
+    const fenceTag = match[1] || "";
+    const code = match[2];
+    const fullMatch = match[0];
 
-    // We'll parse the fenceTag to extract optional language and filename
     let language: string | null = null;
     let filename: { name: string; extension: string } | null = null;
 
-    // Attempt to parse out the language, which we assume is the leading alphanumeric part
-    // Example: fenceTag = "tsx{filename=Calculator.tsx}"
     const langMatch = fenceTag.match(/^([A-Za-z0-9]+)/);
     if (langMatch) {
       language = langMatch[1];
     }
 
-    // Attempt to parse out a filename from braces, e.g. {filename=Calculator.tsx}
     const fileMatch = fenceTag.match(/{\s*filename\s*=\s*([^}]+)\s*}/);
     if (fileMatch) {
       filename = parseFileName(fileMatch[1]);
+    } else {
+      // If no filename is specified, create a default one
+      const extension = language || "txt";
+      filename = { name: `file${codeBlocks.length + 1}`, extension };
     }
 
-    return { code, language, filename, fullMatch };
+    codeBlocks.push({ code, language, filename, fullMatch });
   }
-  return null; // No code block found
+
+  return codeBlocks;
 }
 
 function parseFileName(fileName: string): { name: string; extension: string } {
@@ -188,7 +185,7 @@ export type FrameworkType = 'nextjs' | 'react-vite' | 'react-cra';
 export interface ExportConfig {
   framework: FrameworkType;
   projectName: string;
-  componentCode: string;
+  files: { [key: string]: string };
   language: string;
   dependencies?: string[];
 }
@@ -218,26 +215,25 @@ function normalizeImportPaths(code: string, framework: FrameworkType): string {
 }
 
 export function generateFrameworkStructure(config: ExportConfig) {
-  const { framework, projectName, componentCode, language } = config;
+  const { framework, projectName, files, language } = config;
 
   switch (framework) {
     case 'nextjs':
-      return generateNextJsStructure(projectName, componentCode, language);
+      return generateNextJsStructure(projectName, files, language);
     case 'react-vite':
-      return generateViteStructure(projectName, componentCode, language);
+      return generateViteStructure(projectName, files, language);
     case 'react-cra':
-      return generateCRAStructure(projectName, componentCode, language);
+      return generateCRAStructure(projectName, files, language);
     default:
       throw new Error(`Unsupported framework: ${framework}`);
   }
 }
 
-function generateNextJsStructure(projectName: string, componentCode: string, language: string) {
+function generateNextJsStructure(projectName: string, files: { [key: string]: string }, language: string) {
   const isTypeScript = language === 'tsx' || language === 'typescript';
   const ext = isTypeScript ? 'tsx' : 'jsx';
-  const normalizedCode = normalizeImportPaths(componentCode, 'nextjs');
   
-  return {
+  const structure = {
     'package.json': JSON.stringify({
       name: projectName,
       version: "0.1.0",
@@ -268,14 +264,6 @@ function generateNextJsStructure(projectName: string, componentCode: string, lan
         "@radix-ui/react-slot": "^1.0.2"
       }
     }, null, 2),
-    
-    [`app/page.${ext}`]: `import GeneratedApp from '@/components/generated-app'
-
-export default function Home() {
-  return <GeneratedApp />
-}`,
-
-    [`components/generated-app.${ext}`]: normalizedCode,
     
     'app/layout.tsx': `import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
@@ -315,14 +303,30 @@ export default function RootLayout({
     'README.md': getReadme(projectName, 'Next.js'),
     '.gitignore': getGitIgnore('nextjs')
   };
+
+  for (const [path, code] of Object.entries(files)) {
+    const normalizedCode = normalizeImportPaths(code, 'nextjs');
+    const finalPath = path.startsWith('/') ? path.substring(1) : path;
+    structure[`components/${finalPath}`] = normalizedCode;
+  }
+
+  const mainComponent = Object.keys(files)[0];
+  const mainComponentPath = mainComponent.startsWith('/') ? mainComponent.substring(1) : mainComponent;
+
+  structure[`app/page.${ext}`] = `import GeneratedApp from '@/components/${mainComponentPath}'
+
+export default function Home() {
+  return <GeneratedApp />
+}`;
+  
+  return structure;
 }
 
-function generateViteStructure(projectName: string, componentCode: string, language: string) {
+function generateViteStructure(projectName: string, files: { [key: string]: string }, language: string) {
   const isTypeScript = language === 'tsx' || language === 'typescript';
   const ext = isTypeScript ? 'tsx' : 'jsx';
-  const normalizedCode = normalizeImportPaths(componentCode, 'react-vite');
   
-  return {
+  const structure = {
     'package.json': JSON.stringify({
       name: projectName,
       private: true,
@@ -354,19 +358,6 @@ function generateViteStructure(projectName: string, componentCode: string, langu
       }
     }, null, 2),
     
-    [`src/App.${ext}`]: normalizedCode,
-    
-    'src/main.tsx': `import React from 'react'
-import ReactDOM from 'react-dom/client'
-import App from './App.${ext === 'jsx' ? 'jsx' : 'tsx'}'
-import './index.css'
-
-ReactDOM.createRoot(document.getElementById('root')!).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-)`,
-
     'src/index.css': getTailwindCSS(),
     'index.html': getViteHTML(projectName),
     'vite.config.ts': getViteConfig(),
@@ -376,14 +367,36 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
     'README.md': getReadme(projectName, 'Vite'),
     '.gitignore': getGitIgnore('vite')
   };
+
+  for (const [path, code] of Object.entries(files)) {
+    const normalizedCode = normalizeImportPaths(code, 'react-vite');
+    const finalPath = path.startsWith('/') ? path.substring(1) : path;
+    structure[`src/${finalPath}`] = normalizedCode;
+  }
+
+  const mainComponent = Object.keys(files)[0];
+  const mainComponentPath = mainComponent.startsWith('/') ? mainComponent.substring(1) : mainComponent;
+  const mainComponentImportPath = `./${mainComponentPath.replace(/\.tsx?$/, '')}`;
+
+  structure[`src/main.tsx`] = `import React from 'react'
+import ReactDOM from 'react-dom/client'
+import App from '${mainComponentImportPath}'
+import './index.css'
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>,
+)`;
+
+  return structure;
 }
 
-function generateCRAStructure(projectName: string, componentCode: string, language: string) {
+function generateCRAStructure(projectName: string, files: { [key: string]: string }, language: string) {
   const isTypeScript = language === 'tsx' || language === 'typescript';
   const ext = isTypeScript ? 'tsx' : 'jsx';
-  const normalizedCode = normalizeImportPaths(componentCode, 'react-cra');
   
-  return {
+  const structure = {
     'package.json': JSON.stringify({
       name: projectName,
       version: "0.1.0",
@@ -427,8 +440,6 @@ function generateCRAStructure(projectName: string, componentCode: string, langua
       }
     }, null, 2),
     
-    [`src/App.${ext}`]: normalizedCode,
-    'src/index.tsx': getCRAIndex(),
     'src/index.css': getTailwindCSS(),
     'public/index.html': getCRAHTML(projectName),
     'tailwind.config.js': getTailwindConfig(),
@@ -437,6 +448,32 @@ function generateCRAStructure(projectName: string, componentCode: string, langua
     'README.md': getReadme(projectName, 'Create React App'),
     '.gitignore': getGitIgnore('cra')
   };
+
+  for (const [path, code] of Object.entries(files)) {
+    const normalizedCode = normalizeImportPaths(code, 'react-cra');
+    const finalPath = path.startsWith('/') ? path.substring(1) : path;
+    structure[`src/${finalPath}`] = normalizedCode;
+  }
+
+  const mainComponent = Object.keys(files)[0];
+  const mainComponentPath = mainComponent.startsWith('/') ? mainComponent.substring(1) : mainComponent;
+  const mainComponentImportPath = `./${mainComponentPath.replace(/\.tsx?$/, '')}`;
+
+  structure[`src/index.tsx`] = `import React from 'react';
+import ReactDOM from 'react-dom/client';
+import './index.css';
+import App from '${mainComponentImportPath}';
+
+const root = ReactDOM.createRoot(
+  document.getElementById('root') as HTMLElement
+);
+root.render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);`;
+
+  return structure;
 }
 
 // Helper functions to get shadcn components

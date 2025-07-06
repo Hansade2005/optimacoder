@@ -11,11 +11,11 @@ import { CheckIcon, CopyIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export default function ReactCodeRunner({
-  code,
+  files: initialFiles,
   template: initialTemplate,
   onRequestFix,
 }: {
-  code: string;
+  files: { [key: string]: string };
   template?: string;
   onRequestFix?: (e: string) => void;
 }) {
@@ -32,15 +32,11 @@ export default function ReactCodeRunner({
     (initialTemplate as SandpackTemplate) || "react-ts"
   );
 
-  const [files, setFiles] = useState<{ [key: string]: any }>({
-    "/App.tsx": code,
-  });
+  const [files, setFiles] = useState<{ [key: string]: any }>(initialFiles);
 
   useEffect(() => {
-    if (code && code !== files["/App.tsx"]) {
-      setFiles({ "/App.tsx": code });
-    }
-  }, [code]);
+    setFiles(initialFiles);
+  }, [initialFiles]);
 
   return (
     <SandpackProvider
@@ -48,8 +44,8 @@ export default function ReactCodeRunner({
       template={template}
       files={files}
       options={{
-        visibleFiles: ["/App.tsx"],
-        activeFile: "/App.tsx",
+        visibleFiles: Object.keys(files),
+        activeFile: Object.keys(files)[0] || "/App.tsx",
         externalResources: [
           "https://unpkg.com/@tailwindcss/ui/dist/tailwind-ui.min.css",
         ],

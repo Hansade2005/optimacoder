@@ -7,17 +7,18 @@ export async function POST(request: NextRequest) {
     const { 
       framework, 
       projectName, 
-      componentCode, 
+      files, 
       language, 
       githubToken,
       githubUsername 
-    }: ExportConfig & { 
+    }: Omit<ExportConfig, 'componentCode'> & { 
+      files: { [key: string]: string };
       githubToken: string; 
       githubUsername: string; 
     } = await request.json();
 
     // Validate inputs
-    if (!framework || !projectName || !componentCode || !githubToken || !githubUsername) {
+    if (!framework || !projectName || !files || !githubToken || !githubUsername) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
     const projectStructure = generateFrameworkStructure({
       framework,
       projectName,
-      componentCode,
+      files,
       language
     });
 

@@ -12,7 +12,7 @@ import { Github, ExternalLink, Loader2, CheckCircle } from 'lucide-react';
 import { FrameworkType } from '@/lib/utils';
 
 interface ExportToGitHubProps {
-  componentCode: string;
+  files: { [key: string]: string };
   language: string;
   isOpen: boolean;
   onClose: () => void;
@@ -25,7 +25,7 @@ interface GitHubAuthStatus {
 }
 
 export default function ExportToGitHub({ 
-  componentCode, 
+  files, 
   language, 
   isOpen, 
   onClose 
@@ -93,7 +93,7 @@ export default function ExportToGitHub({
         body: JSON.stringify({
           framework,
           projectName,
-          componentCode,
+          files,
           language,
           githubToken: authStatus.token,
           githubUsername: authStatus.username
@@ -184,12 +184,12 @@ export default function ExportToGitHub({
               </div>
 
               <div className="space-y-2">
-                <Label>Component Preview</Label>
-                <Textarea
-                  value={componentCode}
-                  readOnly
-                  className="h-32 font-mono text-xs"
-                />
+                <Label>Files to be exported</Label>
+                <div className="border rounded-md p-2 h-32 overflow-y-auto text-xs font-mono">
+                  {Object.keys(files).map(fileName => (
+                    <div key={fileName}>{fileName}</div>
+                  ))}
+                </div>
               </div>
 
               {error && (

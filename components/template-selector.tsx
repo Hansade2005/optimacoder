@@ -1,7 +1,5 @@
 "use client";
 
-import { useState } from "react";
-
 import { TEMPLATES } from "@/lib/constants";
 
 export default function TemplateSelector({

@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter, usePathname } from "next/navigation";
 import { useSidebar } from "@/components/sidebar-context";
 import { 
   MagnifyingGlassIcon,
@@ -41,9 +40,6 @@ export default function ChatSidebar({
   const [editTitle, setEditTitle] = useState("");
   const [isMobile, setIsMobile] = useState(false);
   
-  const router = useRouter();
-  const pathname = usePathname();
-
   // Check if we're on mobile
   useEffect(() => {
     const checkMobile = () => {
@@ -84,8 +80,6 @@ export default function ChatSidebar({
   const truncateTitle = (title: string, maxLength: number = 30) => {
     return title.length > maxLength ? title.substring(0, maxLength) + "..." : title;
   };
-
-  const sidebarWidth = isCollapsed ? "w-12" : "w-80";
   
   return (
     <>

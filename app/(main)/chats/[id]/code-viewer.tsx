@@ -8,7 +8,6 @@ import { extractFirstCodeBlock, splitByFirstCodeFence, extractAllCodeBlocks } fr
 import { useState } from "react";
 import type { Chat, Message } from "./page";
 import { Share } from "./share";
-import { StickToBottom } from "use-stick-to-bottom";
 import dynamic from "next/dynamic";
 
 import {

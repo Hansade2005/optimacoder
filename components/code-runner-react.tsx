@@ -6,7 +6,6 @@ import {
   SandpackPreview,
   useSandpack,
 } from "@codesandbox/sandpack-react";
-import dedent from "dedent";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -135,46 +134,6 @@ function ErrorMessage({ onRequestFix }: { onRequestFix: (e: string) => void }) {
       </div>
     </div>
   );
-}
-
-function getShadcnFiles(shadcnComponents: any) {
-  return {
-    "/lib/utils.ts": shadcnComponents.utils,
-    "/components/ui/avatar.tsx": shadcnComponents.avatar,
-    "/components/ui/button.tsx": shadcnComponents.button,
-    "/components/ui/card.tsx": shadcnComponents.card,
-    "/components/ui/checkbox.tsx": shadcnComponents.checkbox,
-    "/components/ui/input.tsx": shadcnComponents.input,
-    "/components/ui/label.tsx": shadcnComponents.label,
-    "/components/ui/radio-group.tsx": shadcnComponents.radioGroup,
-    "/components/ui/select.tsx": shadcnComponents.select,
-    "/components/ui/textarea.tsx": shadcnComponents.textarea,
-    "/components/ui/index.tsx": `
-    export * from "./button"
-    export * from "./card"
-    export * from "./input"
-    export * from "./label"
-    export * from "./select"
-    export * from "./textarea"
-    export * from "./avatar"
-    export * from "./radio-group"
-    export * from "./checkbox"
-    `,
-    "/public/index.html": dedent`
-      <!DOCTYPE html>
-      <html lang="en">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Document</title>
-          <script src="https://cdn.tailwindcss.com"></script>
-        </head>
-        <body>
-          <div id="root"></div>
-        </body>
-      </html>
-    `,
-  };
 }
 
 const dependencies = {

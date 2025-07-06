@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 
 // GitHub OAuth App configuration
 const GITHUB_CLIENT_ID = 'Ov23li8qwE4pAi1Foftn';
-const GITHUB_CLIENT_SECRET = '5ecd58280c67c1a128598cd2580fc01c6d328c46';
 const REDIRECT_URI = 'https://optimacoder.vercel.app/api/auth/github/callback';
 
 export async function GET(request: NextRequest) {

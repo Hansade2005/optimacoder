@@ -6,7 +6,6 @@ import {
   SandpackPreview,
   useSandpack,
 } from "@codesandbox/sandpack-react";
-import dedent from "dedent";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -14,10 +13,12 @@ export default function ReactCodeRunner({
   code,
   template: initialTemplate,
   onRequestFix,
+  files: filesProp,
 }: {
   code: string;
   template?: string;
   onRequestFix?: (e: string) => void;
+  files?: Record<string, string>;
 }) {
   type SandpackTemplate =
     | "react-ts"
@@ -32,15 +33,28 @@ export default function ReactCodeRunner({
     (initialTemplate as SandpackTemplate) || "react-ts"
   );
 
-  const [files, setFiles] = useState<{ [key: string]: any }>({
-    "/App.tsx": code,
-  });
+  // If filesProp is provided, use it; otherwise, fallback to single file mode
+  const initialFiles =
+    filesProp && Object.keys(filesProp).length > 0
+      ? filesProp
+      : { "/App.tsx": code };
+
+  const [files, setFiles] = useState<{ [key: string]: any }>(initialFiles);
 
   useEffect(() => {
-    if (code && code !== files["/App.tsx"]) {
+    if (filesProp && Object.keys(filesProp).length > 0) {
+      setFiles(filesProp);
+    } else if (code && code !== files["/App.tsx"]) {
       setFiles({ "/App.tsx": code });
     }
-  }, [code]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code, filesProp]);
+
+  const fileNames = Object.keys(files);
+  const defaultFile =
+    fileNames.includes("/App.tsx") && fileNames.length > 1
+      ? "/App.tsx"
+      : fileNames[0] || "/App.tsx";
 
   return (
     <SandpackProvider
@@ -48,8 +62,8 @@ export default function ReactCodeRunner({
       template={template}
       files={files}
       options={{
-        visibleFiles: ["/App.tsx"],
-        activeFile: "/App.tsx",
+        visibleFiles: fileNames,
+        activeFile: defaultFile,
         externalResources: [
           "https://unpkg.com/@tailwindcss/ui/dist/tailwind-ui.min.css",
         ],
@@ -120,46 +134,6 @@ function ErrorMessage({ onRequestFix }: { onRequestFix: (e: string) => void }) {
       </div>
     </div>
   );
-}
-
-function getShadcnFiles(shadcnComponents: any) {
-  return {
-    "/lib/utils.ts": shadcnComponents.utils,
-    "/components/ui/avatar.tsx": shadcnComponents.avatar,
-    "/components/ui/button.tsx": shadcnComponents.button,
-    "/components/ui/card.tsx": shadcnComponents.card,
-    "/components/ui/checkbox.tsx": shadcnComponents.checkbox,
-    "/components/ui/input.tsx": shadcnComponents.input,
-    "/components/ui/label.tsx": shadcnComponents.label,
-    "/components/ui/radio-group.tsx": shadcnComponents.radioGroup,
-    "/components/ui/select.tsx": shadcnComponents.select,
-    "/components/ui/textarea.tsx": shadcnComponents.textarea,
-    "/components/ui/index.tsx": `
-    export * from "./button"
-    export * from "./card"
-    export * from "./input"
-    export * from "./label"
-    export * from "./select"
-    export * from "./textarea"
-    export * from "./avatar"
-    export * from "./radio-group"
-    export * from "./checkbox"
-    `,
-    "/public/index.html": dedent`
-      <!DOCTYPE html>
-      <html lang="en">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Document</title>
-          <script src="https://cdn.tailwindcss.com"></script>
-        </head>
-        <body>
-          <div id="root"></div>
-        </body>
-      </html>
-    `,
-  };
 }
 
 const dependencies = {

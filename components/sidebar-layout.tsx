@@ -19,7 +19,6 @@ interface SidebarLayoutProps {
 
 function SidebarLayoutInner({ children }: SidebarLayoutProps) {
   const [chats, setChats] = useState<Chat[]>([]);
-  const [loading, setLoading] = useState(true);
   const { isCollapsed } = useSidebar();
   const router = useRouter();
   const pathname = usePathname();
@@ -38,8 +37,6 @@ function SidebarLayoutInner({ children }: SidebarLayoutProps) {
         })));
       } catch (error) {
         console.error('Failed to load chats:', error);
-      } finally {
-        setLoading(false);
       }
     };
 

@@ -757,10 +757,3 @@ next-env.d.ts
 
   return common;
 }
-
-// Utility function to extract <status>...</status> messages
-export function extractStatusMessages(input: string): string[] {
-  // Extracts all <status>...</status> tags from the input string
-  const matches = Array.from(input.matchAll(/<status>([\s\S]*?)<\/status>/g));
-  return matches.map((m) => m[1].trim());
-}

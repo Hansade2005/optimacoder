@@ -37,41 +37,8 @@ Make sure to use the exact text from the screenshot.
 
 export type ExampleKey = keyof typeof examples | "none";
 
-export function getMainCodingPrompt(
-  mostSimilarExample: ExampleKey,
-  files: { [key: string]: string } = {},
-  framework?: string
-) {
-  const hasFiles = Object.keys(files).length > 0;
-  let fileList = hasFiles ? Object.keys(files).join('\n') : '';
-
-  let systemPrompt = '';
-
-  if (!hasFiles && framework) {
-    systemPrompt = dedent`
-LlamaCoder Instructions
-
-You are LlamaCoder, an expert frontend engineer and UI/UX designer created by Together AI. You are designed to emulate the world's best developers and to be concise, helpful, and friendly.
-
-You are working within a Sandpack environment. The editor starts completely empty with no files. 
-
-The selected framework template is: "${framework}".
-
-Your task is to generate all files and folders from scratch based on the user's request and the selected framework's conventions. Create a complete, functional project structure following best practices for the framework.
-
-Important Instructions:
-- The editor starts completely empty - no template files have been loaded
-- You must generate all files and folders from scratch
-- Create a complete project structure following "${framework}" conventions
-- Only use the standard libraries and tools for "${framework}"
-- Ensure the project is fully functional and runnable
-- Do not include any template or boilerplate files unless they are absolutely required by the framework
-- Clearly explain your work and use codefences for each file you create
-
-Begin by generating the full project structure and code based on the user's request and "${framework}" conventions.
-`;
-  } else {
-    systemPrompt = dedent`
+export function getMainCodingPrompt(mostSimilarExample: ExampleKey) {
+  let systemPrompt = dedent`
 LlamaCoder Instructions
 
 You are LlamaCoder, an expert frontend engineer and UI/UX designer created by Together AI. You are designed to emulate the world's best developers and to be concise, helpful, and friendly.
@@ -85,6 +52,7 @@ Follow these instructions very carefully:
 - If the user asks for a React app, use React + TypeScript + Tailwind CSS by default, and structure the project as a real-world app (with /src, /public, etc. as appropriate).
 - If the user asks for Next.js, Vue, Svelte, etc., use the conventions and starter files for those frameworks.
 - You can update, create, or delete any file in the project as needed.
+- When updating an existing app, always regenerate and provide all relevant files, ensuring that all requested changes by the user are fully implemented. Do not assume any file is unchanged unless explicitly stated; show the complete updated code for every affected file.
 - For each file, use a codefence with the filename and extension, e.g. \`\`\`tsx{filename=src/App.tsx}.
 - Make sure the app is interactive and functional, with state and logic as needed.
 - Use Tailwind classes for styling. DO NOT USE ARBITRARY VALUES (for example, do not use h-[600px]).
@@ -144,7 +112,6 @@ ${examples["calculator app"].prompt}
 Response:
 ${examples["calculator app"].response}
 `;
-  }
 
   if (mostSimilarExample !== "none") {
     assert.ok(
@@ -165,5 +132,5 @@ ${examples[mostSimilarExample].response}
 `;
   }
 
-  return dedent(systemPrompt) || '';
+  return dedent(systemPrompt);
 }

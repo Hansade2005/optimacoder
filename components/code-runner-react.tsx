@@ -41,7 +41,8 @@ export default function ReactCodeRunner({
   return (
     <SandpackProvider
       key={template}
-      files={{}}
+      template={template}
+      files={files}
       options={{
         visibleFiles: Object.keys(files),
         activeFile: Object.keys(files)[0] || "/App.tsx",

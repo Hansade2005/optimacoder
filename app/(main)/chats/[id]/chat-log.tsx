@@ -2,7 +2,7 @@
 
 import type { Chat, Message } from "./page";
 import ArrowLeftIcon from "@/components/icons/arrow-left";
-import { splitByFirstCodeFence, extractStatusMessages } from "@/lib/utils";
+import { splitByFirstCodeFence } from "@/lib/utils";
 import { Fragment } from "react";
 import Markdown from "react-markdown";
 import { StickToBottom } from "use-stick-to-bottom";
@@ -82,26 +82,10 @@ function AssistantMessage({
   isActive?: boolean;
   onMessageClick?: (v: Message) => void;
 }) {
-  // Extract status messages and remove them from content
-  const statusMessages = extractStatusMessages(content);
-  const contentWithoutStatus = content.replace(/<status>[\s\S]*?<\/status>/g, "");
-  const parts = splitByFirstCodeFence(contentWithoutStatus);
+  const parts = splitByFirstCodeFence(content);
 
   return (
     <div>
-      {/* Render status messages if any */}
-      {statusMessages.length > 0 && (
-        <div className="mb-2 flex flex-col gap-1">
-          {statusMessages.map((status, i) => (
-            <div
-              key={i}
-              className="rounded bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700 border border-blue-200 shadow-sm"
-            >
-              {status}
-            </div>
-          ))}
-        </div>
-      )}
       {parts.map((part, i) => (
         <div key={i}>
           {part.type === "text" ? (

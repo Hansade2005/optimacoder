@@ -48,7 +48,6 @@ export default function CodeViewer({
   onTabChange,
   onClose,
   onRequestFix,
-  onFilesChange,
 }: {
   chat: Chat;
   streamText: string;
@@ -58,7 +57,6 @@ export default function CodeViewer({
   onTabChange: (v: "code" | "preview") => void;
   onClose: () => void;
   onRequestFix: (e: string) => void;
-  onFilesChange: (files: { [key: string]: string }) => void;
 }) {
   const apps = message ? extractAllCodeBlocks(message.content) : [];
   const streamAppParts = splitByFirstCodeFence(streamText);
@@ -107,10 +105,6 @@ export default function CodeViewer({
   const [refresh, setRefresh] = useState(0);
   const [showExportModal, setShowExportModal] = useState(false);
 
-  useEffect(() => {
-    onFilesChange(files);
-  }, [files, onFilesChange]);
-
   return (
     <>
       {/* Header bar */}
@@ -155,10 +149,16 @@ export default function CodeViewer({
           {activeTab === "code" ? (
             // Show Sandpack editor + file explorer in Code tab
             <SandpackProvider
+              template={
+                language === "typescript" || language === "ts"
+                  ? "react-ts"
+                  : "react"
+              }
               files={files}
               options={{
                 visibleFiles: Object.keys(files),
                 activeFile: mainFile,
+                // removed editorHeight here as it is not a valid option
               }}
             >
               <SandpackLayout className="flex-grow border border-gray-300 rounded-md">
@@ -180,6 +180,7 @@ export default function CodeViewer({
                   onRequestFix={onRequestFix}
                   language={language}
                   files={files}
+                  template={chat.template}
                   key={refresh}
                 />
               </div>
@@ -200,6 +201,7 @@ export default function CodeViewer({
                   onRequestFix={onRequestFix}
                   language={language}
                   files={files}
+                  template={chat.template}
                   key={refresh}
                 />
               )}
@@ -288,7 +290,3 @@ export default function CodeViewer({
     </>
   );
 }
-function useEffect(arg0: () => void, arg1: any[]) {
-  throw new Error("Function not implemented.");
-}
-

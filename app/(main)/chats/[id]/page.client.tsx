@@ -45,25 +45,26 @@ export default function PageClient({ chat }: { chat: Chat }) {
         .on("content", (delta, content) => {
           setStreamText((text) => text + delta);
 
-          const parts = splitByFirstCodeFence(content);
-          
-          if (!didPushToCode && parts.some(part => part.type === "first-code-fence-generating")) {
+          if (
+            !didPushToCode &&
+            splitByFirstCodeFence(content).some(
+              (part) => part.type === "first-code-fence-generating",
+            )
+          ) {
             didPushToCode = true;
             setIsShowingCodeViewer(true);
             setActiveTab("code");
           }
 
-          if (!didPushToPreview) {
-            const codeParts = parts.filter(part => part.type === "first-code-fence");
-            if (codeParts.length > 0) {
-              didPushToPreview = true;
-              setIsShowingCodeViewer(true);
-              // Only switch to preview if we have a complete code block
-              const hasCompleteCode = codeParts.some(part => part.content.trim().length > 0);
-              if (hasCompleteCode) {
-                setActiveTab("preview");
-              }
-            }
+          if (
+            !didPushToPreview &&
+            splitByFirstCodeFence(content).some(
+              (part) => part.type === "first-code-fence",
+            )
+          ) {
+            didPushToPreview = true;
+            setIsShowingCodeViewer(true);
+            setActiveTab("preview");
           }
         })
         .on("finalContent", async (finalText) => {

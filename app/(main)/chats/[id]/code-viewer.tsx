@@ -142,36 +142,12 @@ export default function CodeViewer({
                   ? "react-ts"
                   : "react"
               }
-              files={(() => {
-                const parts = splitByFirstCodeFence(streamText || (message?.content || ""));
-                const codeFiles = parts.filter(p => p.type === "first-code-fence" || p.type === "first-code-fence-generating");
-                
-                if (codeFiles.length === 0) {
-                  return { "/App.tsx": "// no code available" };
-                }
-
-                return codeFiles.reduce((acc, part) => {
-                  const filePath = part.filePath || "/App.tsx";
-                  acc[filePath] = part.content;
-                  return acc;
-                }, {} as Record<string, string>);
-              })()}
+              files={{
+                "/App.tsx": code || "// no code available",
+              }}
               options={{
-                visibleFiles: Object.keys((() => {
-                  const parts = splitByFirstCodeFence(streamText || (message?.content || ""));
-                  const codeFiles = parts.filter(p => p.type === "first-code-fence" || p.type === "first-code-fence-generating");
-                  if (codeFiles.length === 0) return { "/App.tsx": true };
-                  return codeFiles.reduce((acc, part) => {
-                    acc[part.filePath || "/App.tsx"] = true;
-                    return acc;
-                  }, {} as Record<string, boolean>);
-                })()),
-                activeFile: (() => {
-                  const parts = splitByFirstCodeFence(streamText || (message?.content || ""));
-                  const codeFiles = parts.filter(p => p.type === "first-code-fence" || p.type === "first-code-fence-generating");
-                  if (codeFiles.length === 0) return "/App.tsx";
-                  return codeFiles[0].filePath || "/App.tsx";
-                })(),
+                visibleFiles: ["/App.tsx"],
+                activeFile: "/App.tsx",
                 // removed editorHeight here as it is not a valid option
               }}
             >

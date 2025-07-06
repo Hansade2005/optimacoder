@@ -65,7 +65,6 @@ export function splitByFirstCodeFence(markdown: string) {
     content: string;
     filename: { name: string; extension: string };
     language: string;
-    filePath?: string;
   }[] = [];
 
   const lines = markdown.split("\n");
@@ -76,11 +75,10 @@ export function splitByFirstCodeFence(markdown: string) {
   let codeBuffer: string[] = [];
 
   // We'll store these when we open the code fence
-  let fenceTag = ""; // e.g. "tsx:/path/to/file.tsx" or "tsx{filename=Calculator.tsx}"
+  let fenceTag = ""; // e.g. "tsx{filename=Calculator.tsx}"
   let extractedFilename: string | null = null;
-  let extractedFilePath: string | null = null;
 
-  // Regex to match an entire code fence line, e.g. ```tsx:/path/to/file.tsx or ```tsx{filename=Calculator.tsx}
+  // Regex to match an entire code fence line, e.g. ```tsx{filename=Calculator.tsx}
   const codeFenceRegex = /^```([^\n]*)$/;
 
   for (const line of lines) {
@@ -90,19 +88,11 @@ export function splitByFirstCodeFence(markdown: string) {
       if (match && !inFirstCodeFence) {
         // -- OPENING the first code fence --
         inFirstCodeFence = true;
-        fenceTag = match[1] || ""; // e.g. tsx:/path/to/file.tsx or tsx{filename=Calculator.tsx}
+        fenceTag = match[1] || ""; // e.g. tsx{filename=Calculator.tsx}
 
-        // First try to extract file path (format: ```language:/path/to/file.ext)
-        const pathMatch = fenceTag.match(/^([^:]+):(.+)$/);
-        if (pathMatch) {
-          extractedFilePath = pathMatch[2].trim();
-          const fileName = extractedFilePath.split('/').pop() || '';
-          extractedFilename = fileName;
-        } else {
-          // If no path format, attempt to extract filename from {filename=...}
-          const fileMatch = fenceTag.match(/{\s*filename\s*=\s*([^}]+)\s*}/);
-          extractedFilename = fileMatch ? fileMatch[1] : null;
-        }
+        // Attempt to extract filename from {filename=...}
+        const fileMatch = fenceTag.match(/{\s*filename\s*=\s*([^}]+)\s*}/);
+        extractedFilename = fileMatch ? fileMatch[1] : null;
 
         // Flush any accumulated text into the result
         if (textBuffer.length > 0) {
@@ -133,13 +123,12 @@ export function splitByFirstCodeFence(markdown: string) {
             : fenceTag.trim();
 
         result.push({
-            type: "first-code-fence",
-            // content: `\`\`\`${fenceTag}\n${codeBuffer.join("\n")}\n\`\`\``,
-            content: codeBuffer.join("\n"),
-            filename: parsedFilename,
-            language,
-            filePath: extractedFilePath || undefined
-          });
+          type: "first-code-fence",
+          // content: `\`\`\`${fenceTag}\n${codeBuffer.join("\n")}\n\`\`\``,
+          content: codeBuffer.join("\n"),
+          filename: parsedFilename,
+          language,
+        });
 
         // Reset code buffer
         codeBuffer = [];

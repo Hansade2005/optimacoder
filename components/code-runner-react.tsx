@@ -26,30 +26,48 @@ export default function ReactCodeRunner({
     | "angular"
     | "svelte"
     | "solid"
-    | "vanilla";
+    | "vanilla"
+    | "preact"
+    | "nextjs";
 
   const [template, setTemplate] = useState<SandpackTemplate>(
     (initialTemplate as SandpackTemplate) || "react-ts"
   );
 
-  const [files, setFiles] = useState<{ [key: string]: any }>({
-    "/App.tsx": code,
-  });
+  const [files, setFiles] = useState<{ [key: string]: any }>({});
 
   useEffect(() => {
-    if (code && code !== files["/App.tsx"]) {
-      setFiles({ "/App.tsx": code });
+    if (code) {
+      // Parse the code string to extract multiple files
+      const fileMatches = code.match(/```[^\n]*\n([\s\S]*?)```/g) || [];
+      const newFiles: { [key: string]: string } = {};
+      
+      fileMatches.forEach((match) => {
+        const fileMatch = (match as string).match(/```([^:\n]*)(?::([^\n]*))?\n([\s\S]*?)```/);
+        if (fileMatch) {
+          const [_, lang, filePath, content] = fileMatch;
+          const path = filePath ? filePath.trim() : '/App.tsx';
+          newFiles[path] = content;
+        }
+      });
+
+      // If no files were extracted, treat the entire code as App.tsx
+      if (Object.keys(newFiles).length === 0) {
+        newFiles["/App.tsx"] = code;
+      }
+
+      setFiles(newFiles);
     }
   }, [code]);
 
   return (
     <SandpackProvider
       key={template}
-      template={template}
+      template={template as "react-ts" | "react" | "vue" | "angular" | "svelte" | "solid" | "vanilla" | "nextjs"}
       files={files}
       options={{
-        visibleFiles: ["/App.tsx"],
-        activeFile: "/App.tsx",
+        visibleFiles: Object.keys(files),
+        activeFile: Object.keys(files)[0] || "/App.tsx",
         externalResources: [
           "https://unpkg.com/@tailwindcss/ui/dist/tailwind-ui.min.css",
         ],

@@ -4,7 +4,7 @@ import ChevronLeftIcon from "@/components/icons/chevron-left";
 import ChevronRightIcon from "@/components/icons/chevron-right";
 import CloseIcon from "@/components/icons/close-icon";
 import RefreshIcon from "@/components/icons/refresh";
-import { extractFirstCodeBlock, splitByFirstCodeFence } from "@/lib/utils";
+import { extractFirstCodeBlock, splitByFirstCodeFence, extractAllCodeBlocks } from "@/lib/utils";
 import { useState } from "react";
 import type { Chat, Message } from "./page";
 import { Share } from "./share";
@@ -93,6 +93,17 @@ export default function CodeViewer({
   const [refresh, setRefresh] = useState(0);
   const [showExportModal, setShowExportModal] = useState(false);
 
+  // Multi-file extraction
+  const files = streamText
+    ? extractAllCodeBlocks(streamText)
+    : message
+    ? extractAllCodeBlocks(message.content)
+    : { "/App.tsx": "// no code available" };
+
+  // Pick the first file as the default active file, fallback to /App.tsx
+  const fileNames = Object.keys(files);
+  const defaultFile = fileNames.includes("/App.tsx") ? "/App.tsx" : fileNames[0] || "/App.tsx";
+
   return (
     <>
       {/* Header bar */}
@@ -142,13 +153,10 @@ export default function CodeViewer({
                   ? "react-ts"
                   : "react"
               }
-              files={{
-                "/App.tsx": code || "// no code available",
-              }}
+              files={files}
               options={{
-                visibleFiles: ["/App.tsx"],
-                activeFile: "/App.tsx",
-                // removed editorHeight here as it is not a valid option
+                visibleFiles: fileNames,
+                activeFile: defaultFile,
               }}
             >
               <SandpackLayout className="flex-grow border border-gray-300 rounded-md">
@@ -169,9 +177,10 @@ export default function CodeViewer({
                 <CodeRunner
                   onRequestFix={onRequestFix}
                   language={language}
-                  code={code}
+                  code={files[defaultFile]}
                   template={chat.template}
                   key={refresh}
+                  files={files}
                 />
               </div>
             )
@@ -181,7 +190,7 @@ export default function CodeViewer({
         // Two-up layout for python, ts, js, etc.
         <div className="flex grow flex-col bg-white">
           <div className="h-1/2 overflow-y-auto">
-            <SyntaxHighlighter code={code} language={language} />
+            <SyntaxHighlighter code={files[defaultFile]} language={language} />
           </div>
           <div className="flex h-1/2 flex-col">
             <div className="border-t border-gray-300 px-4 py-4">Output</div>
@@ -190,9 +199,10 @@ export default function CodeViewer({
                 <CodeRunner
                   onRequestFix={onRequestFix}
                   language={language}
-                  code={code}
+                  code={files[defaultFile]}
                   template={chat.template}
                   key={refresh}
+                  files={files}
                 />
               )}
             </div>

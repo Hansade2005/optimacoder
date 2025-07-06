@@ -10,11 +10,13 @@ export default function LazyCodeRunner({
   code,
   template,
   onRequestFix,
+  files,
 }: {
   language: string;
   code: string;
   template?: string;
   onRequestFix?: (e: string) => void;
+  files?: Record<string, string>;
 }) {
   const [shouldLoadSandpack, setShouldLoadSandpack] = useState(true);
 
@@ -41,7 +43,7 @@ export default function LazyCodeRunner({
         </div>
       }
     >
-      <SandpackCodeRunner code={code} template={template} onRequestFix={onRequestFix} />
+      <SandpackCodeRunner code={code} template={template} onRequestFix={onRequestFix} files={files} />
     </Suspense>
   );
 }

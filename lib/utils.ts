@@ -720,3 +720,22 @@ next-env.d.ts
 
   return common;
 }
+
+/**
+ * Extracts all code blocks with filenames from markdown.
+ * Returns an object: { [filename]: code }
+ */
+export function extractAllCodeBlocks(input: string): Record<string, string> {
+  // Matches codefences like ```tsx{filename=src/App.tsx}\n...code...\n```
+  const codeBlockRegex = /```([A-Za-z0-9]+)?(?:\{\s*filename\s*=\s*([^}]+)\s*\})?\n([\s\S]*?)\n```/g;
+  const files: Record<string, string> = {};
+  let match;
+  while ((match = codeBlockRegex.exec(input)) !== null) {
+    const filename = match[2]?.trim();
+    const code = match[3];
+    if (filename) {
+      files[filename] = code;
+    }
+  }
+  return files;
+}

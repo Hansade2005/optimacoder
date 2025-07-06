@@ -14,10 +14,12 @@ export default function ReactCodeRunner({
   code,
   template: initialTemplate,
   onRequestFix,
+  files: filesProp,
 }: {
   code: string;
   template?: string;
   onRequestFix?: (e: string) => void;
+  files?: Record<string, string>;
 }) {
   type SandpackTemplate =
     | "react-ts"
@@ -32,15 +34,28 @@ export default function ReactCodeRunner({
     (initialTemplate as SandpackTemplate) || "react-ts"
   );
 
-  const [files, setFiles] = useState<{ [key: string]: any }>({
-    "/App.tsx": code,
-  });
+  // If filesProp is provided, use it; otherwise, fallback to single file mode
+  const initialFiles =
+    filesProp && Object.keys(filesProp).length > 0
+      ? filesProp
+      : { "/App.tsx": code };
+
+  const [files, setFiles] = useState<{ [key: string]: any }>(initialFiles);
 
   useEffect(() => {
-    if (code && code !== files["/App.tsx"]) {
+    if (filesProp && Object.keys(filesProp).length > 0) {
+      setFiles(filesProp);
+    } else if (code && code !== files["/App.tsx"]) {
       setFiles({ "/App.tsx": code });
     }
-  }, [code]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [code, filesProp]);
+
+  const fileNames = Object.keys(files);
+  const defaultFile =
+    fileNames.includes("/App.tsx") && fileNames.length > 1
+      ? "/App.tsx"
+      : fileNames[0] || "/App.tsx";
 
   return (
     <SandpackProvider
@@ -48,8 +63,8 @@ export default function ReactCodeRunner({
       template={template}
       files={files}
       options={{
-        visibleFiles: ["/App.tsx"],
-        activeFile: "/App.tsx",
+        visibleFiles: fileNames,
+        activeFile: defaultFile,
         externalResources: [
           "https://unpkg.com/@tailwindcss/ui/dist/tailwind-ui.min.css",
         ],

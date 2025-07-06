@@ -10,13 +10,15 @@ export default function CodeRunner({
   code,
   template,
   onRequestFix,
+  files,
 }: {
   language: string;
   code: string;
   template?: string;
   onRequestFix?: (e: string) => void;
+  files?: Record<string, string>;
 }) {
-  return <LazyCodeRunner language={language} code={code} template={template} onRequestFix={onRequestFix} />;
+  return <LazyCodeRunner language={language} code={code} template={template} onRequestFix={onRequestFix} files={files} />;
 
   // return (
   //   <>

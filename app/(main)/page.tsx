@@ -105,7 +105,8 @@ export default function Home() {
                   model,
                   quality,
                   screenshotUrl,
-                  template as string
+                  template as string,
+                  {} // Pass empty object for files
                 );
 
                 const streamPromise = fetch(

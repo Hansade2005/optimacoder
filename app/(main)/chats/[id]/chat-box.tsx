@@ -12,11 +12,14 @@ export default function ChatBox({
   chat,
   onNewStreamPromise,
   isStreaming,
+  files,
 }: {
   chat: Chat;
   onNewStreamPromise: (v: Promise<ReadableStream>) => void;
   isStreaming: boolean;
+  files: { [key: string]: string };
 }) {
+  const [status, setStatus] = useState("");
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const disabled = isPending || isStreaming;
@@ -45,6 +48,11 @@ export default function ChatBox({
         className="relative flex w-full"
         action={async () => {
           startTransition(async () => {
+            setStatus("Reading codebase files...");
+            // This is where you would get the files from the Sandpack instance.
+            // For now, I'll just use an empty object.
+            const files = {};
+            setStatus("Successfully read codebase.");
             const message = await createMessage(chat.id, prompt, "user");
             const streamPromise = fetch(
               "/api/get-next-completion-stream-promise",
@@ -53,6 +61,7 @@ export default function ChatBox({
                 body: JSON.stringify({
                   messageId: message.id,
                   model: chat.model,
+                  files,
                 }),
               },
             ).then((res) => {
@@ -66,6 +75,7 @@ export default function ChatBox({
             startTransition(() => {
               router.refresh();
               setPrompt("");
+              setStatus("");
             });
           });
         }}
@@ -112,6 +122,7 @@ export default function ChatBox({
               </button>
             </div>
           </div>
+          {status && <div className="mt-2 text-sm text-gray-500">{status}</div>}
         </fieldset>
       </form>
     </div>

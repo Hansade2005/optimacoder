@@ -9,12 +9,14 @@ import {
 import { notFound } from "next/navigation";
 import Together from "together-ai";
 
+console.log("<status>Reading codebase files...</status>");
 export async function createChat(
   prompt: string,
   model: string,
   quality: "high" | "low",
   screenshotUrl: string | undefined,
   template: string,
+  files: { [key: string]: string },
 ) {
   const prisma = getPrisma();
   const chat = await prisma.chat.create({
@@ -158,7 +160,11 @@ export async function createChat(
           data: [
             {
               role: "system",
-              content: getMainCodingPrompt(mostSimilarExample as import("@/lib/prompts").ExampleKey),
+              content: getMainCodingPrompt(
+                mostSimilarExample as import("@/lib/prompts").ExampleKey,
+                files,
+                template
+              ),
               position: 0,
             },
             { role: "user", content: userMessage, position: 1 },
@@ -181,6 +187,7 @@ export async function createChat(
     lastMessageId: lastMessage.id,
   };
 }
+console.log("<status>Successfully Read codebase.</status>");
 
 export async function createMessage(
   chatId: string,

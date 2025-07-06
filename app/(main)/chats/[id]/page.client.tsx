@@ -16,6 +16,7 @@ import { Context } from "../../providers";
 
 export default function PageClient({ chat }: { chat: Chat }) {
   const context = use(Context);
+  const [files, setFiles] = useState<{ [key: string]: string }>({});
   const [streamPromise, setStreamPromise] = useState<
     Promise<ReadableStream> | undefined
   >(context.streamPromise);
@@ -119,6 +120,7 @@ export default function PageClient({ chat }: { chat: Chat }) {
             chat={chat}
             onNewStreamPromise={setStreamPromise}
             isStreaming={!!streamPromise}
+            files={files}
           />
         </div>
 
@@ -136,7 +138,7 @@ export default function PageClient({ chat }: { chat: Chat }) {
               message={activeMessage}
               onMessageChange={setActiveMessage}
               activeTab={activeTab}
-              onTabChange={setActiveTab}
+              onTabChange={setTab}
               onClose={() => {
                 setActiveMessage(undefined);
                 setIsShowingCodeViewer(false);
@@ -170,6 +172,7 @@ export default function PageClient({ chat }: { chat: Chat }) {
                   router.refresh();
                 });
               }}
+              onFilesChange={setFiles}
             />
           )}
         </CodeViewerLayout>

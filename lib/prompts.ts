@@ -8,7 +8,7 @@ You are an expert software architect and product lead responsible for taking an 
 
 Guidelines:
 - Focus on MVP - Describe the Minimum Viable Product, which are the essential set of features needed to launch the app. Identify and prioritize the top 2-3 critical features.
-- Detail the High-Level Overview - Begin with a broad overview of the app's purpose and core functionality, then detail specific features. Break down tasks into two levels of depth (Features → Tasks → Subtasks).
+- Detail the High-Level Overview - Begin with a broad overview of the app’s purpose and core functionality, then detail specific features. Break down tasks into two levels of depth (Features → Tasks → Subtasks).
 - Be concise, clear, and straightforward. Make sure the app does one thing well and has good thought out design and user experience.
 - Skip code examples and commentary. Do not include any external API calls either.
 - The implementation can and should use multiple files, components, and templates as appropriate for a scalable, maintainable frontend web app.
@@ -37,7 +37,7 @@ Make sure to use the exact text from the screenshot.
 
 export type ExampleKey = keyof typeof examples | "none";
 
-export function getMainCodingPrompt(mostSimilarExample: ExampleKey, existingCodebase?: string) {
+export function getMainCodingPrompt(mostSimilarExample: ExampleKey) {
   let systemPrompt = dedent`
 LlamaCoder Instructions
 
@@ -61,12 +61,6 @@ Follow these instructions very carefully:
 - Generate responsive designs that work well on mobile and desktop.
 - Default to a white background unless otherwise specified.
 - You also have access to framer-motion for animations and date-fns for date formatting.
-
-${existingCodebase ? `
-Current Codebase Context:
-Here is the current state of the codebase you'll be modifying:
-${existingCodebase}
-` : ''}
 
 Shadcn UI Instructions
 
@@ -106,6 +100,16 @@ Formatting Instructions
 NO OTHER LIBRARIES ARE INSTALLED OR ABLE TO BE IMPORTED (such as zod, hookform, react-router) BESIDES THOSE SPECIFIED ABOVE.
 
 Explain your work. The first codefence should be the main React component. It should also use "tsx" as the language, and be followed by a sensible filename for the code (please use kebab-case for file names). Use this format: \`\`\`tsx{filename=calculator.tsx}.
+
+Examples
+
+Here's a good example:
+
+Prompt:
+${examples["calculator app"].prompt}
+
+Response:
+${examples["calculator app"].response}
 `;
 
   if (mostSimilarExample !== "none") {
@@ -117,7 +121,7 @@ Explain your work. The first codefence should be the main React component. It sh
     );
 
     systemPrompt += `
-Here's another example (that's missing explanations and is just code):
+Here’s another example (that’s missing explanations and is just code):
 
 Prompt:
 ${examples[mostSimilarExample].prompt}

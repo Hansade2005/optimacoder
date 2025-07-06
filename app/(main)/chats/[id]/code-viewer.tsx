@@ -10,6 +10,7 @@ import type { Chat, Message } from "./page";
 import { Share } from "./share";
 import { StickToBottom } from "use-stick-to-bottom";
 import dynamic from "next/dynamic";
+
 import {
   SandpackProvider,
   SandpackLayout,
@@ -92,33 +93,6 @@ export default function CodeViewer({
   const [refresh, setRefresh] = useState(0);
   const [showExportModal, setShowExportModal] = useState(false);
 
-  const getCodebaseContext = () => {
-    if (!message) return '';
-    
-    // Get all assistant messages up to the current one
-    const contextMessages = assistantMessages.slice(0, currentVersion + 1);
-    
-    // Extract code blocks from each message
-    const codeContext = contextMessages.map(msg => {
-      const codeBlock = extractFirstCodeBlock(msg.content);
-      if (!codeBlock) return '';
-      
-      return `File: ${codeBlock.filename.name}.${codeBlock.filename.extension}\n` +
-             `Content:\n${codeBlock.code}\n\n`;
-    }).join('\n');
-    
-    return codeContext;
-  };
-
-  const handleRequestFix = (error: string) => {
-    const codebaseContext = getCodebaseContext();
-    const contextMessage = codebaseContext 
-      ? `Here's the current state of the codebase:\n${codebaseContext}\n\nError:\n${error}`
-      : error;
-    
-    onRequestFix(contextMessage);
-  };
-
   return (
     <>
       {/* Header bar */}
@@ -174,6 +148,7 @@ export default function CodeViewer({
               options={{
                 visibleFiles: ["/App.tsx"],
                 activeFile: "/App.tsx",
+                // removed editorHeight here as it is not a valid option
               }}
             >
               <SandpackLayout className="flex-grow border border-gray-300 rounded-md">
@@ -192,7 +167,7 @@ export default function CodeViewer({
             language && (
               <div className="flex h-full items-center justify-center">
                 <CodeRunner
-                  onRequestFix={handleRequestFix}
+                  onRequestFix={onRequestFix}
                   language={language}
                   code={code}
                   template={chat.template}
@@ -213,7 +188,7 @@ export default function CodeViewer({
             <div className="flex grow items-center justify-center border-t">
               {!streamAppIsGenerating && (
                 <CodeRunner
-                  onRequestFix={handleRequestFix}
+                  onRequestFix={onRequestFix}
                   language={language}
                   code={code}
                   template={chat.template}

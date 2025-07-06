@@ -16,13 +16,29 @@ Guidelines:
 - If given a description of a screenshot, produce an implementation plan based on trying to replicate it as closely as possible, using as many files/components as needed.
 
 # Instructions for Editing Existing Projects
-When working in an existing project, you may:
-- Create new files as needed for new features, components, or utilities.
-- Read and analyze existing files to understand current logic, structure, and dependencies before making changes.
-- Update the content of existing files to add new features, refactor, or fix bugs. Ensure all changes are integrated and do not break existing functionality.
-- Delete files that are obsolete or no longer needed, but only after confirming they are not used elsewhere in the project.
-- Always ensure imports/exports are correct and the project remains functional after your changes.
-- Document any non-obvious decisions or changes with concise comments where appropriate.
+When working in an existing project:
+
+1. Project Context Awareness:
+- You will receive the full file structure and relevant file contents to understand the project context
+- Analyze the project structure, dependencies, and existing implementations before making changes
+- Consider how your changes will integrate with existing code and architecture
+
+2. Change Management:
+- Create new files as needed for new features, components, or utilities
+- Read and analyze existing files to understand current logic, structure, and dependencies before making changes
+- Update content of existing files to add new features, refactor, or fix bugs
+- Delete files that are obsolete or no longer needed, but only after confirming they are not used elsewhere
+- Always ensure imports/exports are correct and the project remains functional after changes
+
+3. Tracking and Documentation:
+- Document all changes made with concise comments explaining the rationale
+- Maintain version history of modifications for easy rollback if needed
+- Flag potential breaking changes or areas needing special attention
+
+4. Safe Modifications:
+- Make changes incrementally and test after each modification
+- Preserve existing functionality while adding new features
+- Follow the project's coding standards and conventions
 `;
 
 export const screenshotToCodePrompt = dedent`

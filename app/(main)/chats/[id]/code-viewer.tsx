@@ -80,20 +80,53 @@ export default function CodeViewer({
 
   const [refresh, setRefresh] = useState(0);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [showContextPanel, setShowContextPanel] = useState(true);
 
   return (
-    <>
+    <div className="relative h-full">
       <div className="flex h-16 shrink-0 items-center justify-between border-b border-gray-300 px-4">
-        <div className="inline-flex items-center gap-4">
+        {showContextPanel && (
+          <div className="absolute left-0 top-16 z-10 h-[calc(100%-4rem)] w-64 border-r border-gray-300 bg-white p-4">
+            <h3 className="mb-2 text-sm font-medium">Project Context</h3>
+            <div className="space-y-2 text-sm">
+              <div>
+                <div className="font-medium">File:</div>
+                <div className="truncate">{title}</div>
+              </div>
+              <div>
+                <div className="font-medium">Dependencies:</div>
+                <div className="truncate">{language} • {chat.template}</div>
+              </div>
+              <div>
+                <div className="font-medium">Version History:</div>
+                <div className="text-xs">
+                  v{currentVersion + 1} of {assistantMessages.length}
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+        {/* Corrected structure: This div wraps the context toggle and the close/title */}
+        <div className="flex items-center gap-4"> 
           <button
             className="text-gray-400 hover:text-gray-700"
-            onClick={onClose}
+            onClick={() => setShowContextPanel(!showContextPanel)}
           >
-            <CloseIcon className="size-5" />
+            <svg className="size-5" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
+            </svg>
           </button>
-          <span>
-            {title} v{currentVersion + 1}
-          </span>
+          <div className="inline-flex items-center gap-4">
+            <button
+              className="text-gray-400 hover:text-gray-700"
+              onClick={onClose}
+            >
+              <CloseIcon className="size-5" />
+            </button>
+            <span>
+              {title} v{currentVersion + 1}
+            </span>
+          </div>
         </div>
         {layout === "tabbed" && (
           <div className="rounded-lg border-2 border-gray-300 p-1">
@@ -230,6 +263,6 @@ export default function CodeViewer({
         isOpen={showExportModal}
         onClose={() => setShowExportModal(false)}
       />
-    </>
+    </div>
   );
 }

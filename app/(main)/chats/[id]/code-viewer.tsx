@@ -10,6 +10,12 @@ import type { Chat, Message } from "./page";
 import { Share } from "./share";
 import { StickToBottom } from "use-stick-to-bottom";
 import dynamic from "next/dynamic";
+import {
+  SandpackProvider,
+  SandpackLayout,
+  SandpackFileExplorer,
+  SandpackCodeEditor,
+} from "@codesandbox/sandpack-react";
 
 const ExportToGitHub = dynamic(() => import("@/components/export-to-github"), {
   ssr: false,

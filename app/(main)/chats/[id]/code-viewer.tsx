@@ -5,7 +5,7 @@ import ChevronRightIcon from "@/components/icons/chevron-right";
 import CloseIcon from "@/components/icons/close-icon";
 import RefreshIcon from "@/components/icons/refresh";
 import { extractFirstCodeBlock, splitByFirstCodeFence } from "@/lib/utils";
-import { useState, useEffect, useCallback } from "react";
+import { useState } from "react";
 import type { Chat, Message } from "./page";
 import { Share } from "./share";
 import { StickToBottom } from "use-stick-to-bottom";
@@ -14,10 +14,9 @@ import dynamic from "next/dynamic";
 import {
   SandpackProvider,
   SandpackLayout,
+  SandpackFileExplorer,
   SandpackCodeEditor,
 } from "@codesandbox/sandpack-react";
-
-import { SandpackFileExplorer } from "sandpack-file-explorer"; 
 
 const ExportToGitHub = dynamic(() => import("@/components/export-to-github"), {
   ssr: false,
@@ -31,7 +30,6 @@ const CodeRunner = dynamic(() => import("@/components/code-runner"), {
     </div>
   ),
 });
-
 const SyntaxHighlighter = dynamic(() => import("@/components/syntax-highlighter"), {
   ssr: false,
   loading: () => (
@@ -40,80 +38,6 @@ const SyntaxHighlighter = dynamic(() => import("@/components/syntax-highlighter"
     </div>
   ),
 });
-
-type FileChange = {
-  type: "create" | "modify" | "delete";
-  path: string;
-  content?: string;
-};
-
-function parseFilesFromContent(content: string) {
-  const files: Record<string, string> = {};
-  const fileRegex = /```(?:tsx|ts|jsx|js|typescript|javascript|html|css|json|md)\{filename=([^\}]+)\}([\s\S]*?)```/g;
-
-  let match;
-  while ((match = fileRegex.exec(content)) !== null) {
-    const [, filename, fileContent] = match;
-    files[filename] = fileContent.trim();
-  }
-
-  if (Object.keys(files).length === 0) {
-    const appCode = extractFirstCodeBlock(content);
-    if (appCode?.code) {
-      files["/App.tsx"] = appCode.code;
-    }
-  }
-
-  return files;
-}
-
-function getProjectContext(files: Record<string, string>) {
-  const importsMap: Record<string, string[]> = {};
-  const exportsMap: Record<string, string[]> = {};
-
-  Object.entries(files).forEach(([path, content]) => {
-    const importMatches = content.matchAll(/import\s.*from\s['"](.*)['"]/g);
-    importsMap[path] = [...importMatches].map((m) => m[1]);
-
-    const exportMatches = content.match(/export\s+(const|function|class)\s+(\w+)/g);
-    exportsMap[path] = exportMatches
-      ? exportMatches.map((m) => m.split(" ")[2])
-      : [];
-  });
-
-  return {
-    filePaths: Object.keys(files),
-    imports: importsMap,
-    exports: exportsMap,
-    components: Object.entries(exportsMap)
-      .filter(([_, exports]) => exports.some((e) => /^[A-Z]/.test(e)))
-      .map(([path]) => path),
-  };
-}
-
-function trackFileChanges(
-  newFiles: Record<string, string>,
-  oldFiles: Record<string, string>,
-  setChanges: React.Dispatch<React.SetStateAction<FileChange[]>>
-) {
-  const newChanges: FileChange[] = [];
-
-  Object.keys(newFiles).forEach((path) => {
-    if (!(path in oldFiles)) {
-      newChanges.push({ type: "create", path, content: newFiles[path] });
-    }
-  });
-
-  Object.keys(oldFiles).forEach((path) => {
-    if (path in newFiles && oldFiles[path] !== newFiles[path]) {
-      newChanges.push({ type: "modify", path, content: newFiles[path] });
-    } else if (!(path in newFiles)) {
-      newChanges.push({ type: "delete", path });
-    }
-  });
-
-  setChanges((prev) => [...prev, ...newChanges]);
-}
 
 export default function CodeViewer({
   chat,
@@ -134,32 +58,6 @@ export default function CodeViewer({
   onClose: () => void;
   onRequestFix: (e: string) => void;
 }) {
-  const [files, setFiles] = useState<Record<string, string>>({});
-  const [activeFile, setActiveFile] = useState("/App.tsx");
-  const [changes, setChanges] = useState<FileChange[]>([]);
-  const [refresh, setRefresh] = useState(0);
-  const [showExportModal, setShowExportModal] = useState(false);
-
-  const updateFiles = useCallback(() => {
-    const content = message?.content || streamText;
-    if (content) {
-      const parsedFiles = parseFilesFromContent(content);
-      const projectContext = getProjectContext(parsedFiles);
-
-      trackFileChanges(parsedFiles, files, setChanges);
-      setFiles((prev) => ({ ...prev, ...parsedFiles }));
-
-      if (!activeFile || !parsedFiles[activeFile]) {
-        const firstFile = Object.keys(parsedFiles)[0] || "/App.tsx";
-        setActiveFile(firstFile);
-      }
-    }
-  }, [message?.content, streamText, files, activeFile]);
-
-  useEffect(() => {
-    updateFiles();
-  }, [updateFiles]);
-
   const app = message ? extractFirstCodeBlock(message.content) : undefined;
   const streamAppParts = splitByFirstCodeFence(streamText);
   const streamApp = streamAppParts.find(
@@ -192,9 +90,12 @@ export default function CodeViewer({
       ? assistantMessages.at(currentVersion + 1)
       : undefined;
 
+  const [refresh, setRefresh] = useState(0);
+  const [showExportModal, setShowExportModal] = useState(false);
+
   return (
     <>
-      {/* Header */}
+      {/* Header bar */}
       <div className="flex h-16 shrink-0 items-center justify-between border-b border-gray-300 px-4">
         <div className="inline-flex items-center gap-4">
           <button
@@ -230,10 +131,11 @@ export default function CodeViewer({
         )}
       </div>
 
-      {/* Main */}
+      {/* Main content */}
       {layout === "tabbed" ? (
         <div className="flex grow flex-col overflow-y-auto bg-white">
           {activeTab === "code" ? (
+            // Show Sandpack editor + file explorer in Code tab
             <SandpackProvider
               template={
                 language === "typescript" || language === "ts"
@@ -241,19 +143,16 @@ export default function CodeViewer({
                   : "react"
               }
               files={{
-                ...files,
-                "/App.tsx": files["/App.tsx"] || "// No code available",
+                "/App.tsx": code || "// no code available",
               }}
               options={{
-                visibleFiles: Object.keys(files),
-                activeFile: activeFile,
+                visibleFiles: ["/App.tsx"],
+                activeFile: "/App.tsx",
+                // removed editorHeight here as it is not a valid option
               }}
             >
               <SandpackLayout className="flex-grow border border-gray-300 rounded-md">
-                <SandpackFileExplorer
-                  autoHiddenFiles={false}
-                  onDoubleClickFile={(file) => setActiveFile(file)}
-                />
+                <SandpackFileExplorer />
                 <SandpackCodeEditor
                   showTabs
                   showLineNumbers
@@ -279,6 +178,7 @@ export default function CodeViewer({
           )}
         </div>
       ) : (
+        // Two-up layout for python, ts, js, etc.
         <div className="flex grow flex-col bg-white">
           <div className="h-1/2 overflow-y-auto">
             <SyntaxHighlighter code={code} language={language} />
@@ -300,7 +200,7 @@ export default function CodeViewer({
         </div>
       )}
 
-      {/* Footer */}
+      {/* Footer with share, refresh, export, and version navigation */}
       <div className="flex items-center justify-between border-t border-gray-300 px-4 py-4">
         <div className="inline-flex items-center gap-2.5 text-sm">
           <Share message={message && !streamApp ? message : undefined} />

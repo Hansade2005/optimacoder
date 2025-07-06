@@ -82,10 +82,9 @@ export default function CodeViewer({
       ? assistantMessages.at(currentVersion + 1)
       : undefined;
 
-  // State for refreshing the code runner, showing export modal, and showing context panel
+  // State for refreshing the code runner, showing export modal
   const [refresh, setRefresh] = useState(0);
   const [showExportModal, setShowExportModal] = useState(false);
-  const [showContextPanel, setShowContextPanel] = useState(false); // Initialize as false to show bubble
 
   return (
     <div className="relative h-full flex flex-col">
@@ -176,53 +175,6 @@ export default function CodeViewer({
           </div>
         </div>
       )}
-
-      {/* Floating Project Context Bubble */}
-      {!showContextPanel && (
-        <button
-          className="fixed bottom-4 right-4 z-20 size-12 flex items-center justify-center rounded-full bg-blue-600 text-white shadow-lg hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all duration-300 ease-in-out"
-          onClick={() => setShowContextPanel(true)}
-          aria-label="Open Project Context"
-        >
-          {/* Hamburger icon or info icon */}
-          <svg className="size-6" fill="currentColor" viewBox="0 0 24 24">
-            <path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/>
-          </svg>
-        </button>
-      )}
-
-      {/* Project Context Panel (Expanded) */}
-      <div
-        className={`fixed inset-y-0 right-0 z-20 w-80 bg-white shadow-xl transform transition-transform duration-300 ease-in-out
-          ${showContextPanel ? 'translate-x-0' : 'translate-x-full'}`}
-      >
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h3 className="text-xl font-semibold text-gray-800">Project Context</h3>
-          <button
-            className="text-gray-500 hover:text-gray-700"
-            onClick={() => setShowContextPanel(false)}
-            aria-label="Close Project Context"
-          >
-            <CloseIcon className="size-5" />
-          </button>
-        </div>
-        <div className="p-6 space-y-6">
-          <div>
-            <p className="text-sm font-medium text-gray-600 mb-1">File:</p>
-            <p className="text-base text-gray-900 font-medium break-words">{title || "N/A"}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-600 mb-1">Dependencies:</p>
-            <p className="text-base text-gray-900 font-medium break-words">{language || "N/A"} • {chat.template || "N/A"}</p>
-          </div>
-          <div>
-            <p className="text-sm font-medium text-gray-600 mb-1">Version History:</p>
-            <p className="text-base text-gray-900 font-medium">
-              v{currentVersion + 1} of {assistantMessages.length}
-            </p>
-          </div>
-        </div>
-      </div>
 
       {/* Footer section */}
       <div className="flex items-center justify-between border-t border-gray-300 px-4 py-4 shrink-0">

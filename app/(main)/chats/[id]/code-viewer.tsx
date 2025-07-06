@@ -4,7 +4,7 @@ import ChevronLeftIcon from "@/components/icons/chevron-left";
 import ChevronRightIcon from "@/components/icons/chevron-right";
 import CloseIcon from "@/components/icons/close-icon";
 import RefreshIcon from "@/components/icons/refresh";
-import { extractFirstCodeBlock, splitByFirstCodeFence } from "@/lib/utils";
+import { extractFirstCodeBlock, extractAllCodeBlocks, splitByFirstCodeFence } from "@/lib/utils";
 import { useState } from "react";
 import type { Chat, Message } from "./page";
 import { Share } from "./share";
@@ -93,6 +93,32 @@ export default function CodeViewer({
   const [refresh, setRefresh] = useState(0);
   const [showExportModal, setShowExportModal] = useState(false);
 
+  // Multi-file extraction
+  const codeBlocks = streamText
+    ? extractAllCodeBlocks(streamText)
+    : message
+    ? extractAllCodeBlocks(message.content)
+    : [];
+
+  // Build files object for Sandpack
+  const files: Record<string, string> = {};
+  codeBlocks.forEach((block) => {
+    if (block.filename && block.filename.name) {
+      const fname =
+        block.filename.extension
+          ? `/${block.filename.name}.${block.filename.extension}`
+          : `/${block.filename.name}`;
+      files[fname] = block.code;
+    }
+  });
+  // Fallback to /App.tsx if no files found
+  if (Object.keys(files).length === 0) {
+    files["/App.tsx"] = code || "// no code available";
+  }
+
+  const visibleFiles = Object.keys(files).length > 0 ? Object.keys(files) : ["/App.tsx"];
+  const activeFile = visibleFiles.includes("/App.tsx") ? "/App.tsx" : visibleFiles[0];
+
   return (
     <>
       {/* Header bar */}
@@ -142,13 +168,10 @@ export default function CodeViewer({
                   ? "react-ts"
                   : "react"
               }
-              files={{
-                "/App.tsx": code || "// no code available",
-              }}
+              files={files}
               options={{
-                visibleFiles: ["/App.tsx"],
-                activeFile: "/App.tsx",
-                // removed editorHeight here as it is not a valid option
+                visibleFiles,
+                activeFile,
               }}
             >
               <SandpackLayout className="flex-grow border border-gray-300 rounded-md">

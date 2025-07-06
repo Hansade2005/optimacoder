@@ -39,6 +39,7 @@
     "next": "15.1.4",
     "next-plausible": "^3.12.4",
     "next-s3-upload": "^0.3.4",
+    "pnpm": "^10.12.4",
     "react": "^19",
     "react-dom": "^19",
     "react-markdown": "^9.0.3",

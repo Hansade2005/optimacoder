@@ -5,8 +5,9 @@ import { z } from "zod";
 import Together from "together-ai";
 
 export async function POST(req: Request) {
-  const neon = new Pool({ connectionString: process.env.DATABASE_URL }) as unknown as PoolConfig;
-  const adapter = new PrismaNeon(neon);
+  const connectionString = process.env.DATABASE_URL;
+  if (!connectionString) throw new Error("DATABASE_URL is not defined");
+  const adapter = new PrismaNeon({ connectionString });
   const prisma = new PrismaClient({ adapter });
   const { messageId, model } = await req.json();
 

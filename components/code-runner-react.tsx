@@ -11,13 +11,11 @@ import { CheckIcon, CopyIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 
 export default function ReactCodeRunner({
-  files,
   code,
   template: initialTemplate,
   onRequestFix,
 }: {
-  files?: Record<string, string>;
-  code?: string;
+  code: string;
   template?: string;
   onRequestFix?: (e: string) => void;
 }) {
@@ -34,26 +32,24 @@ export default function ReactCodeRunner({
     (initialTemplate as SandpackTemplate) || "react-ts"
   );
 
-  // Prefer files prop, fallback to code prop
-  const initialFiles = files && Object.keys(files).length > 0 ? files : { "/App.tsx": code };
-  const [sandpackFiles, setSandpackFiles] = useState<{ [key: string]: any }>(initialFiles);
+  const [files, setFiles] = useState<{ [key: string]: any }>({
+    "/App.tsx": code,
+  });
 
   useEffect(() => {
-    if (files && Object.keys(files).length > 0) {
-      setSandpackFiles(files);
-    } else if (code && code !== sandpackFiles["/App.tsx"]) {
-      setSandpackFiles({ "/App.tsx": code });
+    if (code && code !== files["/App.tsx"]) {
+      setFiles({ "/App.tsx": code });
     }
-  }, [files, code]);
+  }, [code]);
 
   return (
     <SandpackProvider
       key={template}
       template={template}
-      files={sandpackFiles}
+      files={files}
       options={{
-        visibleFiles: Object.keys(sandpackFiles),
-        activeFile: Object.keys(sandpackFiles).includes("/App.tsx") ? "/App.tsx" : Object.keys(sandpackFiles)[0],
+        visibleFiles: ["/App.tsx"],
+        activeFile: "/App.tsx",
         externalResources: [
           "https://unpkg.com/@tailwindcss/ui/dist/tailwind-ui.min.css",
         ],

@@ -720,25 +720,3 @@ next-env.d.ts
 
   return common;
 }
-
-/**
- * Extracts all code blocks with filenames from markdown.
- * Returns an array of { code, language, filename: { name, extension }, fullMatch }
- */
-export function extractAllCodeBlocks(input: string) {
-  const codeBlockRegex = /```([A-Za-z0-9]+)?(?:\{\s*filename\s*=\s*([^}]+)\s*\})?\n([\s\S]*?)\n```/g;
-  const results: Array<{
-    code: string;
-    language: string | null;
-    filename: { name: string; extension: string } | null;
-    fullMatch: string;
-  }> = [];
-  let match;
-  while ((match = codeBlockRegex.exec(input)) !== null) {
-    const language = match[1] || null;
-    const filename = match[2] ? parseFileName(match[2]) : null;
-    const code = match[3];
-    results.push({ code, language, filename, fullMatch: match[0] });
-  }
-  return results;
-}

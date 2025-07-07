@@ -105,6 +105,9 @@ export default function CodeViewer({
   const [refresh, setRefresh] = useState(0);
   const [showExportModal, setShowExportModal] = useState(false);
 
+  // If there are no code blocks/files, ensure Sandpack is empty for new projects
+  const hasFiles = Object.keys(files).length > 0;
+
   return (
     <>
       {/* Header bar */}
@@ -149,16 +152,11 @@ export default function CodeViewer({
           {activeTab === "code" ? (
             // Show Sandpack editor + file explorer in Code tab
             <SandpackProvider
-              template={
-                language === "typescript" || language === "ts"
-                  ? "react-ts"
-                  : "react"
-              }
-              files={files}
+              template={undefined} // No template, let AI handle everything
+              files={hasFiles ? files : {}} // Empty if no files
               options={{
-                visibleFiles: Object.keys(files),
-                activeFile: mainFile,
-                // removed editorHeight here as it is not a valid option
+                visibleFiles: hasFiles ? Object.keys(files) : [],
+                activeFile: hasFiles ? mainFile : undefined,
               }}
             >
               <SandpackLayout className="flex-grow border border-gray-300 rounded-md">
@@ -179,8 +177,7 @@ export default function CodeViewer({
                 <CodeRunner
                   onRequestFix={onRequestFix}
                   language={language}
-                  files={files}
-                  template={chat.template}
+                  files={hasFiles ? files : {}}
                   key={refresh}
                 />
               </div>
@@ -200,8 +197,7 @@ export default function CodeViewer({
                 <CodeRunner
                   onRequestFix={onRequestFix}
                   language={language}
-                  files={files}
-                  template={chat.template}
+                  files={hasFiles ? files : {}}
                   key={refresh}
                 />
               )}

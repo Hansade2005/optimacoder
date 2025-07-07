@@ -197,6 +197,7 @@ export default function Home() {
                 </div>
                 <div className="absolute bottom-2 left-2 right-2.5 flex items-center justify-between">
                   <div className="flex items-center gap-3">
+                    <TemplateSelector value={template} onChange={setTemplate} />
                     <Select.Root
                       name="model"
                       value={model}

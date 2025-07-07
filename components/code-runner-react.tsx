@@ -1,6 +1,5 @@
 "use client";
 
-import TemplateSelector from "./template-selector";
 import {
   SandpackProvider,
   SandpackPreview,
@@ -9,6 +8,7 @@ import {
 import dedent from "dedent";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { useState, useEffect } from "react";
+import TemplateSelector from "./template-selector";
 
 export default function ReactCodeRunner({
   files: initialFiles,
@@ -38,6 +38,20 @@ export default function ReactCodeRunner({
     setFiles(initialFiles);
   }, [initialFiles]);
 
+  // Find entry file from special comment in files
+  function getEntryFile(files: { [key: string]: string }): string {
+    for (const [path, content] of Object.entries(files)) {
+      const match = content.match(/^\s*\/\/\s*ENTRY:\s*(\S+)/m);
+      if (match) {
+        return match[1];
+      }
+    }
+    // Fallback to first file or /App.tsx
+    return Object.keys(files)[0] || "/App.tsx";
+  }
+
+  const entryFile = getEntryFile(files);
+
   return (
     <SandpackProvider
       key={template}
@@ -52,6 +66,7 @@ export default function ReactCodeRunner({
       }}
       customSetup={{
         dependencies,
+        entry: entryFile,
       }}
     >
       <div className="absolute top-2 right-2 z-10">
@@ -60,7 +75,6 @@ export default function ReactCodeRunner({
           onChange={(newTemplate: SandpackTemplate) => setTemplate(newTemplate)}
         />
       </div>
-
       <SandpackPreview
         showNavigator={false}
         showOpenInCodeSandbox={false}
@@ -69,7 +83,6 @@ export default function ReactCodeRunner({
         showOpenNewtab={false}
         className="h-full w-full"
       />
-
       {onRequestFix && <ErrorMessage onRequestFix={onRequestFix} />}
     </SandpackProvider>
   );

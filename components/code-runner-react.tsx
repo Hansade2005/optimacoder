@@ -40,9 +40,10 @@ export default function ReactCodeRunner({
   }, [initialFiles]);
 
   // Find entry file from special comment in files
+  // The AI should include a comment like: // ENTRY: /main.tsx
   function getEntryFile(files: { [key: string]: string }): string {
     for (const [path, content] of Object.entries(files)) {
-      const match = content.match(/^\s*\/\/\s*ENTRY:\s*(\S+)/m);
+      const match = content.match(/^[ \t]*\/\/\s*ENTRY:\s*(\S+)/m);
       if (match) {
         return match[1];
       }
@@ -56,9 +57,7 @@ export default function ReactCodeRunner({
 
   return (
     <SandpackProvider
-      key={template}
-      template={template}
-      files={hasFiles ? files : {}} // Empty if no files
+      files={hasFiles ? files : {}} // Only use AI files
       options={{
         visibleFiles: hasFiles ? Object.keys(files) : [],
         activeFile: hasFiles ? Object.keys(files)[0] : undefined,
@@ -131,46 +130,6 @@ function ErrorMessage({ onRequestFix }: { onRequestFix: (e: string) => void }) {
       </div>
     </div>
   );
-}
-
-function getShadcnFiles(shadcnComponents: any) {
-  return {
-    "/lib/utils.ts": shadcnComponents.utils,
-    "/components/ui/avatar.tsx": shadcnComponents.avatar,
-    "/components/ui/button.tsx": shadcnComponents.button,
-    "/components/ui/card.tsx": shadcnComponents.card,
-    "/components/ui/checkbox.tsx": shadcnComponents.checkbox,
-    "/components/ui/input.tsx": shadcnComponents.input,
-    "/components/ui/label.tsx": shadcnComponents.label,
-    "/components/ui/radio-group.tsx": shadcnComponents.radioGroup,
-    "/components/ui/select.tsx": shadcnComponents.select,
-    "/components/ui/textarea.tsx": shadcnComponents.textarea,
-    "/components/ui/index.tsx": `
-    export * from "./button"
-    export * from "./card"
-    export * from "./input"
-    export * from "./label"
-    export * from "./select"
-    export * from "./textarea"
-    export * from "./avatar"
-    export * from "./radio-group"
-    export * from "./checkbox"
-    `,
-    "/public/index.html": dedent`
-      <!DOCTYPE html>
-      <html lang="en">
-        <head>
-          <meta charset="UTF-8">
-          <meta name="viewport" content="width=device-width, initial-scale=1.0">
-          <title>Document</title>
-          <script src="https://cdn.tailwindcss.com"></script>
-        </head>
-        <body>
-          <div id="root"></div>
-        </body>
-      </html>
-    `,
-  };
 }
 
 const dependencies = {

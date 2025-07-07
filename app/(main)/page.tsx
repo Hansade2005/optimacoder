@@ -189,7 +189,6 @@ export default function Home() {
                             }
                           }}
                         />
-                        <TemplateSelector value={template} onChange={setTemplate} />
                         <input type="hidden" name="template" value={template} />
                       </div>
                     </div>

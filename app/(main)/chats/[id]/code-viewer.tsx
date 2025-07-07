@@ -152,7 +152,6 @@ export default function CodeViewer({
           {activeTab === "code" ? (
             // Show Sandpack editor + file explorer in Code tab
             <SandpackProvider
-              template={undefined} // No template, let AI handle everything
               files={hasFiles ? files : {}} // Empty if no files
               options={{
                 visibleFiles: hasFiles ? Object.keys(files) : [],

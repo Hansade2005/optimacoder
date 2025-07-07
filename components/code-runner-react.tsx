@@ -32,6 +32,7 @@ export default function ReactCodeRunner({
     (initialTemplate as SandpackTemplate) || "react-ts"
   );
 
+  // Only use files from props, do not generate or load any default files
   const [files, setFiles] = useState<{ [key: string]: any }>(initialFiles);
 
   useEffect(() => {
@@ -51,15 +52,16 @@ export default function ReactCodeRunner({
   }
 
   const entryFile = getEntryFile(files);
+  const hasFiles = Object.keys(files).length > 0;
 
   return (
     <SandpackProvider
       key={template}
       template={template}
-      files={files}
+      files={hasFiles ? files : {}} // Empty if no files
       options={{
-        visibleFiles: Object.keys(files),
-        activeFile: Object.keys(files)[0] || "/App.tsx",
+        visibleFiles: hasFiles ? Object.keys(files) : [],
+        activeFile: hasFiles ? Object.keys(files)[0] : undefined,
         externalResources: [
           "https://unpkg.com/@tailwindcss/ui/dist/tailwind-ui.min.css",
         ],

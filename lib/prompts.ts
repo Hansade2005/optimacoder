@@ -1,5 +1,4 @@
 import dedent from "dedent";
-import shadcnDocs from "./shadcn-docs";
 import assert from "assert";
 import { examples } from "./shadcn-examples";
 
@@ -51,55 +50,20 @@ Follow these instructions very carefully:
 - The selected framework type will be provided as plain text in the system prompt. Use this to determine the codebase structure and conventions to follow.
 - Do not assume any files exist. Do not initialize with any template files. The editor will be empty for you to start generating the complete project files from scratch.
 - Generate all files, folders, and code needed for a fully working project, following the conventions and structure of the selected framework.
-- For each file, use a codefence with the filename and extension, e.g. \`\`\`tsx{filename=src/App.tsx}.
+- You MUST generate all components and UI files you will need for the project. Do not assume any UI library or component exists unless you generate it yourself.
+- For each file, use a codefence with the filename and extension, e.g. \`\`\`tsx{filename=src/App.tsx} or \`\`\`js{filename=src/utils.js}.
 - You MUST specify the entry file for the project by adding a special comment at the top of the main file, e.g. // ENTRY: /src/main.tsx or // ENTRY: /index.js. This tells the code runner which file to use as the entry point.
 - Make sure the app is interactive and functional, with state and logic as needed.
 - Use Tailwind classes for styling. DO NOT USE ARBITRARY VALUES (for example, do not use h-[600px]).
-- Use Lucide React icons and Shadcn UI components as described below.
 - For placeholder images, use <div className="bg-gray-200 border-2 border-dashed rounded-xl w-16 h-16" />
-- Only use the allowed libraries and icons as described below.
+- Only use standard libraries and those explicitly mentioned in the prompt or user request.
 - Generate responsive designs that work well on mobile and desktop.
 - Default to a white background unless otherwise specified.
 - You also have access to framer-motion for animations and date-fns for date formatting.
 
-Shadcn UI Instructions
-
-Here are some prestyled UI components available for use from shadcn. Try to always default to using this library of components. Here are the UI components that are available, along with how to import them, and how to use them:
-
-${shadcnDocs
-    .map(
-      (component) => `
-<component>
-<name>
-${component.name}
-</name>
-<import-instructions>
-${component.importDocs}
-</import-instructions>
-<usage-instructions>
-${component.usageDocs}
-</usage-instructions>
-</component>`,
-    )
-    .join("\n")}
-
-Remember, if you use a shadcn UI component from the above available components, make sure to import it FROM THE CORRECT PATH. Double check that imports are correct, each is imported in its own path, and all components that are used in the code are imported. Here's a list of imports again for your reference:
-
-${shadcnDocs.map((component) => component.importDocs).join("\n")}
-
-Here's an example of an INCORRECT import:
-import { Button, Input, Label } from "/components/ui/button"
-
-Here's an example of a CORRECT import:
-import { Button } from "/components/ui/button"
-import { Input } from "/components/ui/input"
-import { Label } from "/components/ui/label"
-
 Formatting Instructions
 
-NO OTHER LIBRARIES ARE INSTALLED OR ABLE TO BE IMPORTED (such as zod, hookform, react-router) BESIDES THOSE SPECIFIED ABOVE.
-
-Explain your work. The first codefence should be the main React component. It should also use "tsx" as the language, and be followed by a sensible filename for the code (please use kebab-case for file names). Use this format: \`\`\`tsx{filename=calculator.tsx}.
+For each file, use the appropriate file extension for its type (e.g., .tsx for React components, .ts for TypeScript modules, .js for JavaScript, .css for styles, etc.).
 
 Examples
 
@@ -133,3 +97,19 @@ ${examples[mostSimilarExample].response}
 
   return dedent(systemPrompt);
 }
+
+export const updateProjectPrompt = dedent`
+You are an expert full-stack developer. You are working on an existing multi-file project. Your job is to make the requested changes, updates, or feature additions while preserving all existing files and logic unless explicitly told otherwise.
+
+Guidelines:
+- Analyze the current codebase and files before making changes.
+- Only add, update, or remove files and code as needed to implement the new features or requested changes.
+- Do NOT overwrite or delete unrelated files or code.
+- Integrate new features cleanly, updating imports/exports and ensuring the project remains fully functional.
+- Maintain all previous files, logic, and structure unless the user requests otherwise.
+- Document any non-obvious changes or decisions with concise comments.
+- Ensure all changes are type-safe, tested, and follow best practices for the selected framework.
+- If you add new files, use the correct file extension and place them in the appropriate directory.
+- If you update existing files, show only the changed sections (not the whole file) unless the user requests a full file.
+- Always keep the project buildable and error-free after your changes.
+`;

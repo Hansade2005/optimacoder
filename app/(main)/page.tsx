@@ -13,7 +13,7 @@ import { CheckIcon, ChevronDownIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { use, useState, useRef, useTransition } from "react";
+import { use, useState, useRef, useTransition, useLayoutEffect } from "react";
 import { createChat } from "./actions";
 import { Context } from "./providers";
 import Header from "@/components/header";
@@ -36,6 +36,7 @@ export default function Home() {
   const [screenshotLoading, setScreenshotLoading] = useState(false);
   const selectedModel = MODELS.find((m) => m.value === model);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const [isPending, startTransition] = useTransition();
 
@@ -49,6 +50,15 @@ export default function Home() {
     setScreenshotUrl(url);
     setScreenshotLoading(false);
   };
+
+  // Auto-expand textarea as user types
+  useLayoutEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = textarea.scrollHeight + "px";
+    }
+  }, [prompt]);
 
   const textareaResizePrompt = prompt
     .split("\n")
@@ -173,11 +183,12 @@ export default function Home() {
                       </p>
                       <div className="flex items-center gap-2">
                         <textarea
+                          ref={textareaRef}
                           placeholder="Build me a budgeting app..."
                           required
                           name="prompt"
-                          rows={1}
-                          className="peer w-full resize-none bg-transparent p-3 placeholder-gray-500 focus-visible:outline-none disabled:opacity-50"
+                          rows={2}
+                          className="peer w-full bg-transparent p-3 placeholder-gray-500 focus-visible:outline-none disabled:opacity-50 min-h-[48px] max-h-40 overflow-y-auto"
                           value={prompt}
                           onChange={(e) => setPrompt(e.target.value)}
                           onKeyDown={(event) => {
